@@ -1,0 +1,73 @@
+.quill {
+  width: 100%;
+  height: 100%;
+}
+.ql-toolbar {
+  display: none;
+}
+.ql-tooltip {
+  transform: translate(110px, 0px) !important;
+  position: fixed !important;
+  border-radius: 4px;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+}
+
+.ql-editor ul {
+  padding-left: 0.5em !important;
+}
+.ql-editor ol {
+  padding-left: 1em !important;
+}
+
+.ql-editor .ql-indent-1 {
+  padding-left: 3.5em !important;
+}
+.ql-editor .ql-indent-2 {
+  padding-left: 5.5em !important;
+}
+.ql-editor .ql-indent-3 {
+  padding-left: 7.5em !important;
+}
+.ql-editor .ql-indent-4 {
+  padding-left: 9.5em !important;
+}
+.ql-editor .ql-indent-5 {
+  padding-left: 11.5em !important;
+}
+.ql-editor .ql-indent-6 {
+  padding-left: 13.5em !important;
+}
+.ql-editor .ql-indent-7 {
+  padding-left: 15.5em !important;
+}
+.ql-editor .ql-indent-8 {
+  padding-left: 17.5em !important;
+}
+
+
+/* UPPERCASE LETTERS AND ROMAN NUMBERALS FOR ORDERED LISTS */
+.ql-editor .ql-indent-1::before {
+  text-transform: uppercase;
+}
+.ql-editor .ql-indent-2::before {
+  text-transform: uppercase;
+}
+
+.ql-editor ul li::before {
+  font-weight: 800;
+}
+
+.ql-editor ul>li {
+  position: relative;
+}
+.ql-editor ul>li:before {
+  content: "•";
+  font-size: 1.3em;
+  line-height: 1em;
+  position: absolute;
+  top: 1px;
+  transform: translateX(2px);
+}
