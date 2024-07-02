@@ -8,18 +8,24 @@ const ContextMenu = () => {
   const {title, id, options, pos, className} = contextMenuData.value;
 
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [menuPos, setMenuPos] = useState({x: 0, y: 0});
   const divRef = useRef(null);
+
+  // effect(()=> {
+  //   const menuWidth = 100;
+  //   const contentBounds = document.documentElement.getBoundingClientRect();
+  //   const leftPos = pos.x > contentBounds.width - menuWidth ? contentBounds.width - menuWidth : pos.x;
+  //   const topPos = pox.y < 10 ? 10 : pos.y;
+  //   setMenuPos({x: leftPos, y: topPos});
+  // }, [pos]);
 
   useEffect(() => {
     const threshold = 10;
 
     const checkDistance = (cPos: Point | undefined = undefined) => {
-      console.log('WOW');
       if (divRef.current) {
-
         const cursorPos: Point = cPos || cursorPosition;
         const rect = divRef.current.getBoundingClientRect();
-        console.log({rect});
 
         let inBox = true;
         if (cursorPos.y > rect.bottom + threshold) inBox = false;
