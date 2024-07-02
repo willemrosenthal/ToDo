@@ -87,23 +87,47 @@ export const saveTab = (update: TabUpdateType) => {
   };
 };
 
-export function createTab(name = '', defaultContent = ''): Tab {
+export function createTab(name = '', defaultContent = ' '): Tab {
   const s = storeData.value;
   const newTabId = findLowestMissingId(s.tabOrder);
   const newTab: Tab = {
     id: newTabId,
-    name: name || `new-tab-${newTabId}`,
+    name: name || `new-tab-${newTabId+1}`,
     content: defaultContent,
   };
-  storeData.value = {
-    tabs: {
-      ...s.tabs,
-      [newTabId]: newTab,
-    },
-    currentTabIndex: s.tabOrder.length,
-    tabOrder: [...s.tabOrder, newTabId],
-  };
+  batch(() => {
+    storeData.value = {
+      tabs: {
+        ...s.tabs,
+        [newTabId]: newTab,
+      },
+      currentTabIndex: s.tabOrder.length,
+      tabOrder: [...s.tabOrder, newTabId],
+    };
+    currentTab.value = newTab;
+  });
+  // requestAnimationFrame(() => {
+  //   currentTab.value = getCurrentTab();
+  //   console.log('current tab:', currentTab.value);
+  // });
   return newTab;
+}
+
+export function deleteTab(index: number): void {
+  const s = storeData.value;
+
+  const tabs = {
+    ...s.tabs,
+  };
+  delete tabs[index];
+
+  if (s.currentTabIndex === index && index > 0) s.currentTabIndex -= 1;
+
+  storeData.value = {
+    tabs,
+    currentTabIndex: s.currentTabIndex,
+    tabOrder: s.tabOrder.filter((v) => v !== index),
+  };
 }
 
 // effects

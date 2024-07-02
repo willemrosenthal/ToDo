@@ -7,11 +7,12 @@
 .tab-bar-tabs {
   padding-top: 3px;
   padding-left: 8px;
-  padding-right: 25px;
+  padding-right: 30px;
   width: 100%;
-  display: flex;
+  // display: flex;
   overflow-x: scroll !important;
-  flex-direction: row;
+  // flex-direction: row;
+  display: -webkit-inline-box;
 }
 
 
@@ -20,7 +21,7 @@
 }
 
 .new-tab-button {
-  width: 25px;
+  width: 30px;
   height: 100%;
   z-index: 1;
   position: absolute;
@@ -32,6 +33,8 @@
   align-items: center;
   border-left: 1px solid rgb(232, 228, 228);
   font-weight: 800;
+  border-left: 2px solid rgb(170, 170, 170);
+  border-bottom: 2px solid rgb(210, 210, 210);
 }
 
 .tabtab-list-container {
@@ -54,7 +57,7 @@
 }
 
 .tabtab-list-container > ul:is(ul,ol)>:not(li) {
-  outline: 1px solid rgb(90, 78, 94);
+  // outline: 1px solid rgb(90, 78, 94);
   margin: 10px 5px 0 5px;
   background-color: aquamarine;
   height: 20px;

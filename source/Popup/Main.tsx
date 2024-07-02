@@ -5,6 +5,8 @@ import React from 'react';
 
 import Editor from './components/Editor/Editor';
 import TabBar from './components/TabBar/TabBar';
+import ContextMenu from './components/ContextMenu/ContextMenu';
+import { showContextMenu } from './signal/contextMenu';
 // import {Tab, useStorage} from './hooks/useStorage';
 // import {dataLoaded} from './hooks/useAsyncLocalStorage/useAsyncLocalStorage';
 // import {useSignalEffect} from '@preact/signals-react';
@@ -21,6 +23,7 @@ const Main: React.FC = () => {
 
   return (
     <div className="main-container">
+      {showContextMenu.value && <ContextMenu />}
       <TabBar />
       <Editor />
     </div>

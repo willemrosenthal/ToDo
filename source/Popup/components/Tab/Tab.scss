@@ -3,8 +3,8 @@
   border-top-right-radius: 6px;
   background-color: #c2c2c2 !important;
   margin-right: 8px;
-  min-width: 85px;
-  padding: 2px 5px;
+  width: 100px;
+  padding: 2px 10px;
   margin-top: 4px;
   justify-content: center;
   display: flex;
@@ -12,6 +12,15 @@
   padding-top: 4px !important;
   font-weight: 600;
   color: #6a6a6a;
+  height: 26px;
+
+  white-space: nowrap !important;         /* Prevents the text from wrapping */
+  overflow: hidden !important;            /* Ensures that the overflowed text is hidden */
+  text-overflow: ellipsis !important;  
+}
+
+.tab-label {
+  margin-top: 2px;
 }
 
 .tab.selected  {
@@ -26,4 +35,15 @@
   -webkit-box-shadow: inset 10px 10px 0px 200px rgba(0,0,0,0) !important;
   -moz-box-shadow: inset 10px 10px 0px 200px rgba(0,0,0,0) !important;
   box-shadow: inset 10px 10px 0px 200px rgba(0,0,0,0) !important;
+}
+
+input {
+  border: 1px solid rgba(83, 83, 83, 0.396);
+  padding: 0px 5px;
+  border-radius: 3px;
+  margin-bottom: -2px;
+  height: 20px;
+  width: 90px;
+  margin-top: -1px;
+  text-align: center;
 }
