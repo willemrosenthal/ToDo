@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // import ReactQuill from 'react-quill';
 // import 'react-quill/dist/quill.snow.css';
 // import {browser, Tabs} from 'webextension-polyfill-ts';
@@ -38,9 +38,17 @@ const Main: React.FC = () => {
     }
   `;
 
-  // const style = {
-  //   backgroundColor: theme.palette.background.background,
-  // };
+  // close popup if it looses focus
+  useEffect(() => {
+    const handleBlur = () => {
+      window.close();
+    };
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, []);
+
   return (
     <StyledMainContainer className='main-container'>
       {/* <div className='main-container' style={style}> */}
