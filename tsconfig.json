@@ -1,5 +1,5 @@
 {
-	"extends": "@abhijithvijayan/tsconfig",
+	// "extends": "@abhijithvijayan/tsconfig",
 	"compilerOptions": {
 		"target": "es5", // ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'.
 		"module": "esnext", // Module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'.
@@ -8,6 +8,7 @@
 			"dom.iterable",
 			"esnext"
 		],
+		"jsx": "react", // Add this line to support JSX syntax
 		"declaration": false,
 		"isolatedModules": true,
 		/* Additional Checks */
@@ -15,7 +16,8 @@
 		"skipLibCheck": true,
 	},
 	"include": [
+		"source/Popup/theme/theme.d.ts",
 		"source",
-		"webpack.config.js"
+		"webpack.config.js",
 	]
 }

@@ -27,6 +27,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.23.9",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.21",
     "@preact/signals-react": "^2.0.2",
     "@react-tabtab-next/tabtab": "^3.3.0",
     "advanced-css-reset": "^1.2.2",
@@ -34,6 +37,7 @@
     "react-dom": "^17.0.2",
     "react-quill": "^2.0.0",
     "react-tabtab-next": "^3.3.0",
+    "styled-components": "^6.1.11",
     "webext-base-css": "^1.4.4",
     "webextension-polyfill-ts": "^0.26.0"
   },

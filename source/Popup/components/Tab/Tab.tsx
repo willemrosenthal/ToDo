@@ -1,23 +1,28 @@
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import './Tab.scss';
-import {deleteTab, getCurrentTabId, saveTab} from '../../signal/todoData';
-import {useContextMenu} from '../../hooks/useContextMenu/useContextMenu';
-import {Point} from '../../signal/contextMenu';
+import { deleteTab, getCurrentTabId, saveTab } from '../../signal/todoData';
+import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
+import { Point } from '../../signal/contextMenu';
+import { useTheme } from '@emotion/react';
 
 type TabProps = {
   title: string;
-  index: number;
   chooseTab: (index: number) => void;
-  id: number;
+  index?: number;
+  id?: number;
+  className?: string;
+  style?: { [key: string]: string };
 };
 
-const Tab = ({title, index, chooseTab, id}: TabProps) => {
+const Tab = ({ title, index, chooseTab, id, className = '', style = {} }: TabProps) => {
+  const theme = useTheme();
   const [onContextMenu] = useContextMenu();
   const [editNameMode, setEditNameMode] = useState(false);
   const [tabTitle, setTabTitle] = useState(title);
   const renameRef = useRef<HTMLInputElement>(null);
 
   const handleOnContextMenu = (e) => {
+    if (id === undefined || index === undefined) return;
     e.preventDefault();
     const options = [
       {
@@ -52,7 +57,7 @@ const Tab = ({title, index, chooseTab, id}: TabProps) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       setEditNameMode(false);
-      saveTab({name: tabTitle});
+      saveTab({ name: tabTitle });
     }
   };
 
@@ -65,8 +70,18 @@ const Tab = ({title, index, chooseTab, id}: TabProps) => {
 
   return (
     <div
-      role="button"
-      className={`tab ${selectedClass()}`}
+      style={{
+        backgroundColor: selectedClass() ? theme.palette.background.default : theme.palette.background.inactive,
+        color: selectedClass() ? theme.palette.text.primary : theme.palette.text.secondary,
+        // borderColor: theme.palette.tertiary.dark,
+        borderLeft: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        borderTop: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        borderRight: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        borderBottom: selectedClass() ? '2px solid transparent' : `2px solid ${theme.palette.border.main}`,
+        ...(style && style),
+      }}
+      role='button'
+      className={`tab ${selectedClass()} ${className}`}
       onKeyDown={handleClick}
       onClick={handleClick}
       tabIndex={id}
@@ -79,13 +94,13 @@ const Tab = ({title, index, chooseTab, id}: TabProps) => {
           <>
             <input
               ref={renameRef}
-              type="text"
+              type='text'
               value={tabTitle}
               onChange={handleTitleChange}
               onKeyDown={handleKeyDown}
               onBlur={() => {
                 setEditNameMode(false);
-                saveTab({name: tabTitle});
+                saveTab({ name: tabTitle });
               }}
             />
           </>

@@ -1,12 +1,8 @@
 // export function tabRightClick(e) {
 //   e.preventDefault();
 
-import {
-  ContextOptions,
-  Point,
-  contextMenuData,
-  showContextMenu,
-} from '../../signal/contextMenu';
+import { batch } from '../../../../node_modules/@preact/signals-react/dist/signals';
+import { ContextOptions, Point, contextAnchorEl, contextMenuData, showContextMenu } from '../../signal/contextMenu';
 
 //   if (document.getElementById("contextMenu").style.display == "block") hideRightClickMenu();
 //   else{
@@ -28,21 +24,20 @@ import {
 export const useContextMenu = () => {
   // function
 
-  function onContextMenu(
-    e: any,
-    options: ContextOptions[],
-    id: number,
-    className = ''
-  ) {
+  function onContextMenu(e: MouseEvent, options: ContextOptions[], id: number, className = '') {
     // if (!showMenu.value) {
-    const pos: Point = {x: e.clientX, y: e.clientY};
-    showContextMenu.value = true;
-    contextMenuData.value = {
-      id,
-      options,
-      pos,
-      className,
-    };
+
+    const pos: Point = { x: e.clientX, y: e.clientY };
+    batch(() => {
+      contextAnchorEl.value = e.currentTarget;
+      showContextMenu.value = true;
+      contextMenuData.value = {
+        id,
+        options,
+        pos,
+        className,
+      };
+    });
     // }
   }
 

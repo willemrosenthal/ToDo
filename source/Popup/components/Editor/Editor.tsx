@@ -7,10 +7,22 @@ import 'react-quill/dist/quill.snow.css';
 import './Editor.scss';
 import { currentTab, saveTab } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';
+import { useTheme } from '@emotion/react';
 
 const Editor = () => {
+  const theme = useTheme();
   const quillRef = useRef<ReactQuill | null>(null);
   const [value, setValue] = useState('');
+
+  useEffect(() => {
+    const quillStyleElement = document.createElement('style');
+    quillStyleElement.innerHTML = `.quill a { color: ${theme.palette.link.main} !important; }`;
+    document.head.appendChild(quillStyleElement);
+
+    return () => {
+      document.head.removeChild(quillStyleElement);
+    };
+  }, [theme]);
 
   // alert(JSON.stringify(tabData));
   const setVal = (newContent: string) => {
@@ -26,21 +38,16 @@ const Editor = () => {
 
   const modules = {
     toolbar: [
-      [{ 'header': [1, 2, false] }],
-      ['bold', 'italic', 'underline','strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      [{ header: [1, 2, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
       ['link', 'image'],
       ['clean'],
     ],
   };
 
   // what does this do?!?
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'bullet', 'indent',
-    'link', 'image'
-  ];
+  const formats = ['header', 'bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'indent', 'link', 'image'];
 
   // handle editor functions
   useEffect(() => {
@@ -142,7 +149,7 @@ const Editor = () => {
       if (headerMatch) {
         const headerLevel = headerMatch[1].length;
         const newText = lineText.replace(/^(#{1,3})\s/, '');
-        
+
         // Replace the line text without the #
         const lineIndex = quill.getIndex(line);
         quill.deleteText(lineIndex, lineText.length);
@@ -168,16 +175,15 @@ const Editor = () => {
   https://medium.com/@makenakong/how-to-customize-the-quill-toolbar-with-react-and-custom-blots-512a7b465339
   */
 
+  const style = {
+    // borderColor: theme.palette.border.main,
+    borderTop: `2px solid ${theme.palette.border.main}`,
+    backgroundColor: theme.palette.background.default,
+  };
+
   return (
     <>
-      <ReactQuill
-        ref={quillRef}
-        theme="snow"
-        value={value}
-        onChange={setVal}
-        modules={modules}
-        formats={formats}
-      />
+      <ReactQuill style={style} ref={quillRef} value={value} onChange={setVal} modules={modules} formats={formats} />
     </>
   );
 };

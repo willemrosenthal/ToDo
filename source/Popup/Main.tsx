@@ -7,10 +7,8 @@ import Editor from './components/Editor/Editor';
 import TabBar from './components/TabBar/TabBar';
 import ContextMenu from './components/ContextMenu/ContextMenu';
 import { showContextMenu } from './signal/contextMenu';
-// import {Tab, useStorage} from './hooks/useStorage';
-// import {dataLoaded} from './hooks/useAsyncLocalStorage/useAsyncLocalStorage';
-// import {useSignalEffect} from '@preact/signals-react';
-// import './styles.scss';
+import { useTheme } from '@emotion/react';
+import styled from 'styled-components';
 
 // function openWebPage(url: string): Promise<Tabs.Tab> {
 //   return browser.tabs.create({url});
@@ -19,60 +17,40 @@ import { showContextMenu } from './signal/contextMenu';
 import './styles.scss';
 
 const Main: React.FC = () => {
-  // const [value, setValue] = useState('');
-  // const tabs = useStorage();
-  // const [tab, setTab] = useState({} as Tab);
+  const theme = useTheme();
 
+  const StyledMainContainer = styled.div`
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: ${theme.palette.scrollbar.thumb};
+    }
+
+    ::-webkit-scrollbar-track {
+      background: ${theme.palette.scrollbar.track};
+    }
+
+    .main-container {
+      background-color: ${theme.palette.background.background};
+    }
+  `;
+
+  // const style = {
+  //   backgroundColor: theme.palette.background.background,
+  // };
   return (
-    <div className="main-container">
-      {showContextMenu.value && <ContextMenu />}
+    <StyledMainContainer className='main-container'>
+      {/* <div className='main-container' style={style}> */}
+      {/* {showContextMenu.value && <ContextMenu />} */}
+      <ContextMenu />
       <TabBar />
       <Editor />
-    </div>
+      {/* </div> */}
+    </StyledMainContainer>
   );
-
-  // return (
-  //   <section id="popup">
-  //     <h2>WEB-EXTENSION-STARTER</h2>
-  //     <button
-  //       id="options__button"
-  //       type="button"
-  //       onClick={(): Promise<Tabs.Tab> => {
-  //         return openWebPage('options.html');
-  //       }}
-  //     >
-  //       Options Page
-  //     </button>
-  //     <div className="links__holder">
-  //       <ul>
-  //         <li>
-  //           <button
-  //             type="button"
-  //             onClick={(): Promise<Tabs.Tab> => {
-  //               return openWebPage(
-  //                 'https://github.com/abhijithvijayan/web-extension-starter'
-  //               );
-  //             }}
-  //           >
-  //             GitHub
-  //           </button>
-  //         </li>
-  //         <li>
-  //           <button
-  //             type="button"
-  //             onClick={(): Promise<Tabs.Tab> => {
-  //               return openWebPage(
-  //                 'https://www.buymeacoffee.com/abhijithvijayan'
-  //               );
-  //             }}
-  //           >
-  //             Buy Me A Coffee
-  //           </button>
-  //         </li>
-  //       </ul>
-  //     </div>
-  //   </section>
-  // );
 };
 
 export default Main;

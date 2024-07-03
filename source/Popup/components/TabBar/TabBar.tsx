@@ -1,13 +1,9 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import './TabBar.scss';
-import {useSignalEffect} from '@preact/signals-react';
+import { useSignalEffect } from '@preact/signals-react';
 import Tab from '../Tab/Tab';
-import {
-  storeData,
-  createTab,
-  setCurrentTab,
-  dataLoaded,
-} from '../../signal/todoData';
+import { storeData, createTab, setCurrentTab, dataLoaded } from '../../signal/todoData';
+import { useTheme } from '@emotion/react';
 
 type TabDisplayType = {
   title: string;
@@ -15,6 +11,7 @@ type TabDisplayType = {
 };
 
 const TabBar = () => {
+  const theme = useTheme();
   const [tabs, setTabs] = useState<TabDisplayType[]>([]);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -59,15 +56,7 @@ const TabBar = () => {
   const tabItems = useMemo(() => {
     return tabs.map((tab, index) => {
       console.log('KEY - ', tab.title);
-      return (
-        <Tab
-          title={tab.title}
-          key={tab.id}
-          id={tab.id}
-          index={index}
-          chooseTab={handleOnTabChange}
-        />
-      );
+      return <Tab title={tab.title} key={tab.id} id={tab.id} index={index} chooseTab={handleOnTabChange} />;
     });
   }, [tabs]);
 
@@ -77,13 +66,19 @@ const TabBar = () => {
     setActiveTab(tabs.length);
   };
 
+  const newTabButtonStyle = {
+    backgroundColor: 'trasparent',
+    // borderBottom: theme.palette.border.main,
+    borderTop: `2px dashed ${theme.palette.border.main}`,
+    borderLeft: `2px dashed ${theme.palette.border.main}`,
+    borderRight: `2px dashed ${theme.palette.border.main}`,
+  };
+
   return (
-    <div className="tab-bar">
+    <div className='tab-bar'>
       <div className='tab-bar-tabs'>
         {tabItems}
-      </div>
-      <div className='new-tab-button' role="button" onClick={newTab} onKeyDown={newTab} tabIndex={0}>
-        +
+        <Tab title={'+'} key={'new-tab-button'} chooseTab={newTab} className='new-tab-button' style={newTabButtonStyle} />
       </div>
     </div>
   );

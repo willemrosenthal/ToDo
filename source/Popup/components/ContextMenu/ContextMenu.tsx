@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './ContextMenu.scss';
-import { Point, contextMenuData, showContextMenu } from '../../signal/contextMenu';
-
-
+import { Point, contextAnchorEl, contextMenuData, showContextMenu } from '../../signal/contextMenu';
+import { Button, Fade, Menu, MenuItem, MenuList } from '../../../../node_modules/@mui/material/index';
+import styled from 'styled-components';
 
 const ContextMenu = () => {
-  const {title, id, options, pos, className} = contextMenuData.value;
+  const { id, options, pos, className } = contextMenuData.value;
 
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [menuPos, setMenuPos] = useState({x: 0, y: 0});
+  // const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const divRef = useRef(null);
 
   // effect(()=> {
@@ -25,7 +25,9 @@ const ContextMenu = () => {
     const checkDistance = (cPos: Point | undefined = undefined) => {
       if (divRef.current) {
         const cursorPos: Point = cPos || cursorPosition;
-        const rect = divRef.current.getBoundingClientRect();
+        const rect = divRef.current.querySelctor('ul').getBoundingClientRect();
+        alert(divRef.current.querySelctor('ul'));
+        alert(rect);
 
         let inBox = true;
         if (cursorPos.y > rect.bottom + threshold) inBox = false;
@@ -53,32 +55,86 @@ const ContextMenu = () => {
     };
   }, [cursorPosition]);
 
+  const closeMenu = () => {
+    showContextMenu.value = false;
+  };
+
+  // const menuStyle = {
+  //   ul: {
+  //     top: `${pos.y}px`,
+  //     left: `${pos.x}px`,
+  //     position: 'absolute',
+  //   },
+  // };
+
+  // const StyledMenu = styled.div`
+  //   .muipaper-root: {
+  //     top: ${pos.y}px;
+  //     left: ${pos.x}px;
+  //     position: 'absolute';
+  //     border: 3px solid blue;
+  //   }
+  // `;
+
   return (
-    <div
-      className={`context-menu ${className}`}
-      style={{top: `${pos.y}px`, left: `${pos.x}px`}}
+    // <StyledMenu className='test'>
+    <Menu
       ref={divRef}
+      id='tab-menu'
+      anchorEl={contextAnchorEl.value}
+      open={showContextMenu.value}
+      // onClose={closeMenu}
+      TransitionComponent={Fade}
+      className={className}
+      onMouseLeave={closeMenu}
+      anchorOrigin={{
+        vertical: 'center',
+        horizontal: 'center',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        // horizontal: 'center',
+      }}
     >
-      <>{title}</>
-      {options.map((o, i) => {
-        const key = `${o.label}_${i}`;
-        return (
-          <button type="button" key={key} onClick={() => {
-              o.callback(id);
-              showContextMenu.value = false;
-            }}>
-            {o.label}
-          </button>
-        );
-      })}
-    </div>
+      <MenuList onMouseLeave={closeMenu}>
+        {' '}
+        {/* Use MenuList and handle onMouseLeave */}
+        {options.map((o, i) => {
+          const key = `${o.label}_${i}`;
+          return (
+            <MenuItem
+              key={key}
+              onClick={() => {
+                o.callback(id);
+                showContextMenu.value = false;
+              }}
+            >
+              {o.label}
+            </MenuItem>
+          );
+        })}
+      </MenuList>
+    </Menu>
+    // </StyledMenu>
+    // <div className={`context-menu ${className}`} style={{ top: `${pos.y}px`, left: `${pos.x}px` }} ref={divRef}>
+    //   <>{title}</>
+    // {options.map((o, i) => {
+    //   const key = `${o.label}_${i}`;
+    //   return (
+    //     <Button
+    //       type='button'
+    //       key={key}
+    //       onClick={() => {
+    //         o.callback(id);
+    //         showContextMenu.value = false;
+    //       }}
+    //     >
+    //       {o.label}
+    //     </Button>
+    //   );
+    // })}
+    // </div>
   );
 };
 
 export default ContextMenu;
-
-{/* <ul>
-<li onClick={() => handleMenuItemClick('Action 1')}>Action 1</li>
-<li onClick={() => handleMenuItemClick('Action 2')}>Action 2</li>
-<li onClick={() => handleMenuItemClick('Action 3')}>Action 3</li>
-</ul> */}
