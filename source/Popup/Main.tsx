@@ -16,6 +16,8 @@ import { showContextMenu } from './signal/contextMenu';
 //   return browser.tabs.create({url});
 // }
 
+import './styles.scss';
+
 const Main: React.FC = () => {
   // const [value, setValue] = useState('');
   // const tabs = useStorage();

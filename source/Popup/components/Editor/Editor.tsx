@@ -3,7 +3,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 // import {browser, Tabs} from 'webextension-polyfill-ts';
 
-import '../../styles.scss';
+// import '../../styles.scss';
 import './Editor.scss';
 import { currentTab, saveTab } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';

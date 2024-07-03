@@ -1,4 +1,4 @@
-import React, {ReactNode, useState} from 'react';
+import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import './Tab.scss';
 import {deleteTab, getCurrentTabId, saveTab} from '../../signal/todoData';
 import {useContextMenu} from '../../hooks/useContextMenu/useContextMenu';
@@ -15,6 +15,7 @@ const Tab = ({title, index, chooseTab, id}: TabProps) => {
   const [onContextMenu] = useContextMenu();
   const [editNameMode, setEditNameMode] = useState(false);
   const [tabTitle, setTabTitle] = useState(title);
+  const renameRef = useRef<HTMLInputElement>(null);
 
   const handleOnContextMenu = (e) => {
     e.preventDefault();
@@ -55,6 +56,13 @@ const Tab = ({title, index, chooseTab, id}: TabProps) => {
     }
   };
 
+  // get focus
+  useEffect(() => {
+    if (editNameMode) {
+      renameRef.current?.focus();
+    }
+  }, [editNameMode]);
+
   return (
     <div
       role="button"
@@ -70,10 +78,15 @@ const Tab = ({title, index, chooseTab, id}: TabProps) => {
         ) : (
           <>
             <input
+              ref={renameRef}
               type="text"
               value={tabTitle}
               onChange={handleTitleChange}
               onKeyDown={handleKeyDown}
+              onBlur={() => {
+                setEditNameMode(false);
+                saveTab({name: tabTitle});
+              }}
             />
           </>
         )}

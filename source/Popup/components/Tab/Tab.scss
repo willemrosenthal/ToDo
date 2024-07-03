@@ -21,6 +21,9 @@
 
 .tab-label {
   margin-top: 2px;
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis !important;
 }
 
 .tab.selected  {
@@ -45,5 +48,5 @@ input {
   height: 20px;
   width: 90px;
   margin-top: -1px;
-  text-align: center;
+  // text-align: center;
 }
