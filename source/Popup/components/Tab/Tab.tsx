@@ -12,14 +12,22 @@ type TabProps = {
   id?: number;
   className?: string;
   style?: { [key: string]: string };
+  newTab?: { tabIsNewId: number; setTabIsNewId: (num: number) => void };
 };
 
-const Tab = ({ title, index, chooseTab, id, className = '', style = {} }: TabProps) => {
+const Tab = ({ title, index, chooseTab, id, className = '', style = {}, newTab }: TabProps) => {
   const theme = useTheme();
   const [onContextMenu] = useContextMenu();
   const [editNameMode, setEditNameMode] = useState(false);
   const [tabTitle, setTabTitle] = useState(title);
   const renameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (newTab && newTab.tabIsNewId === id) {
+      setEditNameMode(true);
+      newTab.setTabIsNewId(-1);
+    }
+  }, []);
 
   const handleOnContextMenu = (e) => {
     if (id === undefined || index === undefined) return;

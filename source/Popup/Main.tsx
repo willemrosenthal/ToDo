@@ -16,6 +16,8 @@ import styled from 'styled-components';
 
 import './styles.scss';
 
+const debugMode = false;
+
 const Main: React.FC = () => {
   const theme = useTheme();
 
@@ -41,7 +43,7 @@ const Main: React.FC = () => {
   // close popup if it looses focus
   useEffect(() => {
     const handleBlur = () => {
-      window.close();
+      if (!debugMode) window.close();
     };
     window.addEventListener('blur', handleBlur);
     return () => {

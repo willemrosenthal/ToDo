@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import './TabBar.scss';
 import { useSignalEffect } from '@preact/signals-react';
 import Tab from '../Tab/Tab';
@@ -11,7 +11,10 @@ type TabDisplayType = {
 };
 
 const TabBar = () => {
+  const tabBarRef = useRef<HTMLDivElement>(null);
+
   const theme = useTheme();
+  const [tabIsNewId, setTabIsNewId] = useState(-1);
   const [tabs, setTabs] = useState<TabDisplayType[]>([]);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -56,14 +59,27 @@ const TabBar = () => {
   const tabItems = useMemo(() => {
     return tabs.map((tab, index) => {
       console.log('KEY - ', tab.title);
-      return <Tab title={tab.title} key={tab.id} id={tab.id} index={index} chooseTab={handleOnTabChange} />;
+      return (
+        <Tab
+          title={tab.title}
+          key={tab.id}
+          id={tab.id}
+          index={index}
+          chooseTab={handleOnTabChange}
+          newTab={{ tabIsNewId, setTabIsNewId }}
+        />
+      );
     });
   }, [tabs]);
 
   const newTab = () => {
-    createTab();
+    const newTab = createTab();
     getTabs();
     setActiveTab(tabs.length);
+    setTabIsNewId(newTab.id);
+    setTimeout(() => {
+      scrollToRight();
+    }, 40);
   };
 
   const newTabButtonStyle = {
@@ -74,9 +90,18 @@ const TabBar = () => {
     borderRight: `2px dashed ${theme.palette.border.main}`,
   };
 
+  const scrollToRight = () => {
+    if (tabBarRef.current) {
+      tabBarRef.current.scrollTo({
+        left: tabBarRef.current.scrollWidth,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   return (
     <div className='tab-bar'>
-      <div className='tab-bar-tabs'>
+      <div className='tab-bar-tabs' ref={tabBarRef}>
         {tabItems}
         <Tab title={'+'} key={'new-tab-button'} chooseTab={newTab} className='new-tab-button' style={newTabButtonStyle} />
       </div>
