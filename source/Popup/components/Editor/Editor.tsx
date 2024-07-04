@@ -8,8 +8,10 @@ import './Editor.scss';
 import { currentTab, saveTab } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';
 import { useTheme } from '@emotion/react';
+import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
 
 const Editor = () => {
+  const [onContextMenu] = useContextMenu();
   const theme = useTheme();
   const quillRef = useRef<ReactQuill | null>(null);
   const [value, setValue] = useState('');
@@ -35,6 +37,25 @@ const Editor = () => {
       setValue(currentTab.value.content);
     }
   });
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    const options = [
+      {
+        label: 'unformat',
+        callback: () => {},
+      },
+      {
+        label: 'code',
+        callback: () => {},
+      },
+      {
+        label: 'quote',
+        callback: () => {},
+      },
+    ];
+    onContextMenu(e, options, 0, true);
+  };
 
   const modules = {
     toolbar: [
@@ -174,6 +195,22 @@ const Editor = () => {
   /*
   https://medium.com/@makenakong/how-to-customize-the-quill-toolbar-with-react-and-custom-blots-512a7b465339
   */
+
+  // add context menu
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      const editorElement = document.querySelector('.ql-editor');
+      if (editorElement) {
+        editorElement.addEventListener('contextmenu', handleContextMenu);
+      }
+
+      return () => {
+        if (editorElement) {
+          editorElement.removeEventListener('contextmenu', handleContextMenu);
+        }
+      };
+    });
+  }, []);
 
   const style = {
     // borderColor: theme.palette.border.main,

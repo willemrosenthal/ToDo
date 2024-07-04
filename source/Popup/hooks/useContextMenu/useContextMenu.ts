@@ -24,19 +24,20 @@ import { ContextOptions, Point, contextAnchorEl, contextMenuData, showContextMen
 export const useContextMenu = () => {
   // function
 
-  function onContextMenu(e: MouseEvent, options: ContextOptions[], id: number, className = '') {
+  function onContextMenu(e: MouseEvent, options: ContextOptions[], data: number | number[], useMousePos: boolean = false, className = '') {
     // if (!showMenu.value) {
 
     const pos: Point = { x: e.clientX, y: e.clientY };
     batch(() => {
       contextAnchorEl.value = e.currentTarget;
-      showContextMenu.value = true;
       contextMenuData.value = {
-        id,
+        data: Array.isArray(data) ? data : [data],
         options,
         pos,
         className,
+        useMousePos,
       };
+      showContextMenu.value = true;
     });
     // }
   }

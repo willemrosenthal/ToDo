@@ -71,3 +71,14 @@
   top: 1px;
   transform: translateX(2px);
 }
+
+.quill-context {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  // background-color: blue;
+  pointer-events: none;
+  z-index: 10;
+}

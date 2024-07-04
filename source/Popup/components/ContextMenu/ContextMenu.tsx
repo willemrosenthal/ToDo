@@ -1,23 +1,52 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './ContextMenu.scss';
 import { Point, contextAnchorEl, contextMenuData, showContextMenu } from '../../signal/contextMenu';
 import { Button, Fade, Menu, MenuItem, MenuList } from '../../../../node_modules/@mui/material/index';
 import styled from 'styled-components';
+import { debugMode } from '../../Main';
+import { effect, useSignalEffect } from '../../../../node_modules/@preact/signals-react/dist/signals';
+
+const debugDontCloseMenu = false;
 
 const ContextMenu = () => {
-  const { id, options, pos, className } = contextMenuData.value;
+  const { id, options, pos, className, useMousePos } = contextMenuData.value;
 
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  // const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const divRef = useRef(null);
 
-  // effect(()=> {
-  //   const menuWidth = 100;
-  //   const contentBounds = document.documentElement.getBoundingClientRect();
-  //   const leftPos = pos.x > contentBounds.width - menuWidth ? contentBounds.width - menuWidth : pos.x;
-  //   const topPos = pox.y < 10 ? 10 : pos.y;
-  //   setMenuPos({x: leftPos, y: topPos});
-  // }, [pos]);
+  const positionOnMouse = useCallback(
+    (x: number, y: number) => {
+      // if (!useMousePos) return;
+      requestAnimationFrame(() => {
+        const tabMenu = document.querySelector('#tab-menu');
+        if (tabMenu) {
+          const firstMuiPaperElement = tabMenu.querySelector('.MuiPaper-root') as HTMLElement;
+          if (firstMuiPaperElement) {
+            console.log('Found element:', firstMuiPaperElement);
+            if (useMousePos) {
+              const xDiff = x - parseInt(firstMuiPaperElement.style.left, 10);
+              const yDiff = y - parseInt(firstMuiPaperElement.style.top, 10);
+              firstMuiPaperElement.style.transform = `translate(${xDiff}px, ${yDiff}px)`;
+            } else firstMuiPaperElement.style.transform = `translate(${0}px, ${0}px)`;
+            // shoudl contrain to window proportions
+          } else {
+            console.log('No element with class "MuiPaper-root" found inside #tab-menu');
+          }
+        } else {
+          console.log('No element with id "tab-menu" found');
+        }
+      });
+    },
+    [pos, useMousePos],
+  );
+
+  effect(() => {
+    if (showContextMenu.value) positionOnMouse(pos.x, pos.y);
+  });
+
+  // useSignalEffect(() => {
+  //   if (showContextMenu.value) positionOnMouse(pos.x, pos.y);
+  // });
 
   useEffect(() => {
     const threshold = 10;
@@ -47,16 +76,14 @@ const ContextMenu = () => {
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    // window.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      // window.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, [cursorPosition]);
 
   const closeMenu = () => {
-    showContextMenu.value = false;
+    if (!debugDontCloseMenu) showContextMenu.value = false;
   };
 
   // const menuStyle = {

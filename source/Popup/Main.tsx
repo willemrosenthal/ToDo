@@ -16,7 +16,7 @@ import styled from 'styled-components';
 
 import './styles.scss';
 
-const debugMode = false;
+export const debugMode = true;
 
 const Main: React.FC = () => {
   const theme = useTheme();

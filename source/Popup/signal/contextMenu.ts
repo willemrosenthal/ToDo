@@ -2,7 +2,7 @@ import { signal } from '@preact/signals-react';
 
 export type ContextOptions = {
   label: string;
-  callback: (id: number) => void;
+  callback: (data: number[]) => void;
 };
 export type Point = {
   x: number;
@@ -10,18 +10,20 @@ export type Point = {
 };
 export type ContextMenuData = {
   title?: string;
-  id: number;
+  data: number[];
   options: ContextOptions[];
   pos: Point;
   className?: string;
+  useMousePos?: boolean;
 };
 
 const generic: ContextMenuData = {
   title: 'test',
-  id: 0,
+  data: [0],
   options: [],
   pos: { x: 0, y: 0 },
   className: '',
+  useMousePos: false,
 };
 
 export const contextAnchorEl = signal<HTMLElement | null>(null);
