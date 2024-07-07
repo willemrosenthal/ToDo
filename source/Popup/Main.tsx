@@ -16,7 +16,7 @@ import styled from 'styled-components';
 
 import './styles.scss';
 
-export const debugMode = true;
+const closeWhenFocusIsLost = false;
 
 const Main: React.FC = () => {
   const theme = useTheme();
@@ -42,13 +42,15 @@ const Main: React.FC = () => {
 
   // close popup if it looses focus
   useEffect(() => {
-    const handleBlur = () => {
-      if (!debugMode) window.close();
-    };
-    window.addEventListener('blur', handleBlur);
-    return () => {
-      window.removeEventListener('blur', handleBlur);
-    };
+    if (closeWhenFocusIsLost) {
+      const handleBlur = () => {
+        window.close();
+      };
+      window.addEventListener('blur', handleBlur);
+      return () => {
+        window.removeEventListener('blur', handleBlur);
+      };
+    }
   }, []);
 
   return (
