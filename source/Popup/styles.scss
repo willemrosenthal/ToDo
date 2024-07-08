@@ -24,6 +24,10 @@
 //   background: rgba(0, 0, 0, 0.12);
 // }
 
+body {
+  height: 1vh;
+}
+
 // EDITOR
 h1 {
   font-weight: 600;
@@ -41,6 +45,16 @@ h4 {
 .main-container {
   width: 404px;
   height: 400px;
+}
+
+.standaloneContainer {
+  position: relative;
+  width: 100% !important;
+}
+
+.standalone {
+  width: 100%;
+  height: calc(100vh - 35px);
 }
 
 #popup {

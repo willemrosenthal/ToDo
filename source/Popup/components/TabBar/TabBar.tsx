@@ -4,6 +4,8 @@ import { useSignalEffect } from '@preact/signals-react';
 import Tab from '../Tab/Tab';
 import { storeData, createTab, setCurrentTab, dataLoaded } from '../../signal/todoData';
 import { useTheme } from '@emotion/react';
+import { isStandalone } from '../../signal/popout';
+import PopoutButton from '../PopoutButton/PopoutButton';
 
 type TabDisplayType = {
   title: string;
@@ -102,6 +104,9 @@ const TabBar = () => {
   return (
     <div className='tab-bar'>
       <div className='tab-bar-tabs' ref={tabBarRef}>
+        {
+          !isStandalone.value && <PopoutButton />
+        }
         {tabItems}
         <Tab title={'+'} key={'new-tab-button'} chooseTab={newTab} className='new-tab-button' style={newTabButtonStyle} />
       </div>
