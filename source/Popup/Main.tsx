@@ -18,6 +18,7 @@ import './styles.scss';
 import PopoutButton from './components/PopoutButton/PopoutButton';
 import { popoutSettings } from './settings/settings';
 import { isStandalone } from './signal/popout';
+import { getFromLocal } from './signal/todoData';
 
 const closeWhenFocusIsLost = false;
 
@@ -66,15 +67,17 @@ const Main: React.FC = () => {
 
   // close popup if it looses focus
   useEffect(() => {
-    if (closeWhenFocusIsLost) {
-      const handleBlur = () => {
-        window.close();
-      };
-      window.addEventListener('blur', handleBlur);
-      return () => {
-        window.removeEventListener('blur', handleBlur);
-      };
-    }
+    const handleBlur = () => {
+      window.close();
+    };
+
+    window.addEventListener('focus', getFromLocal);
+    if (closeWhenFocusIsLost) window.addEventListener('blur', handleBlur);
+    return () => {
+      window.removeEventListener('focus', getFromLocal);
+      if (closeWhenFocusIsLost) window.removeEventListener('blur', handleBlur);
+    };
+
   }, []);
 
   return (

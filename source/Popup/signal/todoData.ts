@@ -13,6 +13,7 @@ const initialStore: StoredData = {
   },
   currentTabIndex: 0,
   tabOrder: [0],
+  timeStamp: -1,
 };
 
 // types
@@ -30,6 +31,7 @@ export type StoredData = {
   tabs: TabData;
   currentTabIndex: number;
   tabOrder: number[];
+  timeStamp?: number;
 };
 export type TabUpdateType = {
   content?: string;
@@ -76,6 +78,7 @@ export const saveTab = (update: TabUpdateType) => {
   const existingTab = storeData.value.tabs[id];
   storeData.value = {
     ...storeData.value,
+    timeStamp: Date.now(),
     tabs: {
       ...storeData.value.tabs,
       [id]: {
@@ -145,16 +148,27 @@ function saveInLocal() {
   console.log('SAVING');
   localStorage.setItem(todoDataKey, JSON.stringify(storeData.value));
 }
-function getFromLocal() {
+
+export function getFromLocal() {
   console.log('LOADING');
   const res = localStorage.getItem(todoDataKey);
   console.log("LOADED:", res);
+  // check date time:
+  
   if (res) {
-    batch(()=> {
-      storeData.value = JSON.parse(res);
+    const parsed: StoredData = JSON.parse(res);
+    const parsedTimestamp = parsed.timeStamp || 0;
+    const storedTiemstamp = storeData.timeStamp || -1;
+    if (parsedTimestamp > storedTiemstamp) {
+      batch(()=> {
+        storeData.value = JSON.parse(res);
+        dataLoaded.value = true;
+        console.log('loaded values from local storage');
+      });
+    }
+    else {
       dataLoaded.value = true;
-      console.log('loaded values from local storage');
-    });
+    }
     requestAnimationFrame(() => {
       currentTab.value = getCurrentTab();
       console.log('current tab:', currentTab.value);
