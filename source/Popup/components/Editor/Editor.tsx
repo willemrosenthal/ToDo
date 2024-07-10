@@ -39,6 +39,7 @@ const Editor = () => {
   });
 
   const handleContextMenu = (e) => {
+    if (!e.metaKey) return;
     e.preventDefault();
     const options = [
       {
