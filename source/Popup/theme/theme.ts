@@ -136,8 +136,8 @@ const classic = createTheme({
       // dark: '#6a0080',
     },
     scrollbar: {
-      thumb: 'rgba(118, 141, 245, 0.5)', // PURPLE '#a692b3',
-      track: 'rgba(118, 141, 245, 0.2)', // PURPLE: 'rgba(188, 175, 196, 0.3)',
+      thumb: 'rgba(123, 135, 186, 0.5)', // blue: 'rgba(118, 141, 245, 0.5)', // PURPLE '#a692b3', // brighter blue
+      track: 'rgba(123, 135, 186, 0.2)', // blue: 'rgba(118, 141, 245, 0.2)', // PURPLE: 'rgba(188, 175, 196, 0.3)',
     },
     border: {
       main: 'rgb(232 219 177)', // lighter: '#ebdeb5', // DARKER: #cfba8a   // LIGHTER: #ebdeb5
@@ -152,7 +152,7 @@ const classic = createTheme({
       default: 'rgb(255, 255, 214)', //46424f //3f3f3f //505050
       inactive: 'rgb(232 219 177)', // INACTIVE TABS: '#d6c59c'
       paper: '#908d96',
-      background: '#768df5', // BEHIND TABS - PURPLE: '#8c74cd', BLUE: '#768df5'
+      background: '#7b87ba', // Dull Blue: '#7b87ba' // BEHIND TABS - PURPLE: '#8c74cd', BRIGHT BLUE: '#768df5'
     },
     link: {
       main: '#768df5', // Define your custom link color
