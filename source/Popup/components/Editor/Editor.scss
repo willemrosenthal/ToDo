@@ -6,9 +6,18 @@
   display: none;
 }
 .ql-tooltip {
-  transform: translate(110px, 0px) !important;
+  transform: translate(80px, -8px) !important;
   position: fixed !important;
   border-radius: 4px;
+  box-shadow: 0 0 5px #00000085 !important;
+  padding: 0px 8px !important;
+  margin-left: 10px;
+}
+.ql-snow .ql-tooltip a.ql-preview {
+  max-width: 130px;
+}
+.ql-snow .ql-tooltip:before {
+  content: "URL:" !important;
 }
 
 .ql-container.ql-snow {
