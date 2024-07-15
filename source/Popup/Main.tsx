@@ -30,16 +30,30 @@ const Main: React.FC = () => {
     chrome.windows.getCurrent((window) => {
       if (window.type === 'popup' && window.width === popoutSettings.width && window.height === popoutSettings.height) {
         isStandalone.value = true;
-        console.log('pop-out')
+        console.log('pop-out');
         // const mainDiv = document.querySelector('.main-container') as HTMLElement;
         // mainDiv.style.width = `100% !important`;
         // mainDiv.style.height = `100% !important`;
       } else {
         isStandalone.value = false;
-        console.log('in-extension')
+        console.log('in-extension');
       }
     });
   }, []);
+
+  useEffect(() => {
+    const quillStyleElement = document.createElement('style');
+    quillStyleElement.innerHTML = `
+      body {
+        background-color: ${theme.palette.background.background} !important;
+      }
+    `;
+    document.head.appendChild(quillStyleElement);
+
+    return () => {
+      document.head.removeChild(quillStyleElement);
+    };
+  }, [theme]);
 
   const StyledMainContainer = styled.div`
     ::-webkit-scrollbar {
@@ -57,8 +71,8 @@ const Main: React.FC = () => {
 
     .main-container {
       background-color: ${theme.palette.background.background};
-      width: ${ isStandalone.value ? '100% !important' : '404px'};
-      height: ${ isStandalone.value ? '100% !important' : '400px'};
+      width: ${isStandalone.value ? '100% !important' : '404px'};
+      height: ${isStandalone.value ? '100% !important' : '400px'};
     }
   `;
 
@@ -77,11 +91,10 @@ const Main: React.FC = () => {
       window.removeEventListener('focus', getFromLocal);
       if (closeWhenFocusIsLost) window.removeEventListener('blur', handleBlur);
     };
-
   }, []);
 
   return (
-    <div className={(isStandalone.value ? 'standaloneContainer' : '')}>
+    <div className={isStandalone.value ? 'standaloneContainer' : ''}>
       <StyledMainContainer className={'main-container ' + (isStandalone.value ? 'standalone' : '')}>
         {/* <div className='main-container' style={style}> */}
         {/* {showContextMenu.value && <ContextMenu />} */}

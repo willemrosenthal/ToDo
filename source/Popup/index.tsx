@@ -6,7 +6,7 @@ import themes from './theme/theme';
 
 import Main from './Main';
 
-const theme = themes['dark'];
+const theme = themes['classic'];
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>

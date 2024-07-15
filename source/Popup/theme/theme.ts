@@ -98,10 +98,10 @@ const dark = createTheme({
       main: '#ff9800',
     },
     background: {
-      default: '#292929', //46424f //3f3f3f //505050
+      default: '#292929', // NOTES BG  //46424f //3f3f3f //505050
       inactive: '#484351', //707070
-      paper: '#908d96',
-      background: '#000', //101010
+      paper: '#908d96', // NOT USED
+      background: '#292929', //101010
     },
     link: {
       main: '#fd69ac', // Define your custom link color
@@ -118,9 +118,61 @@ const dark = createTheme({
   // },
 });
 
+const classic = createTheme({
+  palette: {
+    primary: {
+      main: '#b79df4',
+      // main: '#ff9100',
+      // light: '#ffB144',
+    },
+    secondary: {
+      // main: '#E0C2FF',
+      main: '#f49eec',
+      // light: '#fcd674'
+    },
+    tertiary: {
+      main: '#17d2e3',
+      // light: '#d05ce3',
+      // dark: '#6a0080',
+    },
+    scrollbar: {
+      thumb: 'rgba(118, 141, 245, 0.5)', // PURPLE '#a692b3',
+      track: 'rgba(118, 141, 245, 0.2)', // PURPLE: 'rgba(188, 175, 196, 0.3)',
+    },
+    border: {
+      main: 'rgb(232 219 177)', // lighter: '#ebdeb5', // DARKER: #cfba8a   // LIGHTER: #ebdeb5
+    },
+    error: {
+      main: '#ef5350',
+    },
+    warning: {
+      main: '#ff9800',
+    },
+    background: {
+      default: 'rgb(255, 255, 214)', //46424f //3f3f3f //505050
+      inactive: 'rgb(232 219 177)', // INACTIVE TABS: '#d6c59c'
+      paper: '#908d96',
+      background: '#768df5', // BEHIND TABS - PURPLE: '#8c74cd', BLUE: '#768df5'
+    },
+    link: {
+      main: '#768df5', // Define your custom link color
+    },
+    text: {
+      primary: '#3e3131', //TEXT
+      secondary: '#4d3622', // Inactive tab Text
+      main: '#333', // UNUSED
+    },
+  },
+  // typography: {
+  //   fontFamily: 'Arial, sans-serif',
+  //   fontSize: 14,
+  // },
+});
+
 const themes = {
   light,
   dark,
+  classic,
 };
 
 export default themes;
