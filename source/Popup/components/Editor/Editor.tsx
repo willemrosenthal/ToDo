@@ -183,6 +183,16 @@ const Editor = () => {
         // Move cursor to the end of the line
         quill.setSelection(lineIndex + newText.length, 0);
       }
+
+      // const horizontalLineMatch = lineText.match(/^---\s*$/);
+      // if (horizontalLineMatch) {
+      //   const lineIndex = quill.getIndex(line);
+      //   quill.deleteText(lineIndex, lineText.length);
+      //   quill.insertEmbed(lineIndex, 'hr', true);
+
+      //   // Move cursor to the next line
+      //   quill.setSelection(lineIndex + 1, 0);
+      // }
     };
 
     const quill = quillRef.current?.getEditor();
