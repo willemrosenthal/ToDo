@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { debugMode } from '../../Main';
 import { effect, useSignalEffect } from '../../../../node_modules/@preact/signals-react/dist/signals';
 
-const debugDontCloseMenu = false;
+const debugDontCloseMenu = true;
 
 const ContextMenu = () => {
   const { id, options, pos, className, useMousePos } = contextMenuData.value;

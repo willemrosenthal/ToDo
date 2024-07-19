@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 // import {browser, Tabs} from 'webextension-polyfill-ts';
@@ -43,26 +43,34 @@ const Editor = () => {
     e.preventDefault();
     const options = [
       {
-        label: 'unformat',
+        label: 'un-format',
         callback: () => {
-          removeStyleOnLine();
+          pressUiButton('clean');
         },
       },
       {
         label: 'code',
         callback: () => {
-          makeCodeBlock();
+          pressUiButton('code-block');
         },
       },
       {
         label: 'snippet',
         callback: () => {
-          makeInlineCode();
+          pressUiButton('script');
         },
       },
       {
         label: 'quote',
-        callback: () => {},
+        callback: () => {
+          pressUiButton('blockquote');
+        },
+      },
+      {
+        label: 'strike',
+        callback: () => {
+          pressUiButton('strike');
+        },
       },
     ];
     onContextMenu(e, options, 0, true);
@@ -269,6 +277,11 @@ const Editor = () => {
     codeblockButton.click();
   };
 
+  const pressUiButton = useCallback((key) => {
+    const button = document.querySelector(`.ql-${key}`) as HTMLButtonElement;
+    button.click();
+  }, []);
+
   const makeInlineCode = () => {
     // Select the button using querySelector
     let inlineCodeButton = document.querySelector('.ql-script') as HTMLButtonElement; // You can also use a more specific selector
@@ -279,6 +292,12 @@ const Editor = () => {
     // Select the button using querySelector
     let cleanLineButton = document.querySelector('.ql-clean') as HTMLButtonElement; // You can also use a more specific selector
     cleanLineButton.click();
+  };
+
+  const strikeThrough = () => {
+    // Select the button using querySelector
+    let strikeThroughButton = document.querySelector('.ql-strike') as HTMLButtonElement; // You can also use a more specific selector
+    strikeThroughButton.click();
   };
 
   /*
