@@ -74,6 +74,10 @@ const Main: React.FC = () => {
       width: ${isStandalone.value ? '100% !important' : '404px'};
       height: ${isStandalone.value ? '100% !important' : '400px'};
     }
+
+    sub {
+      background-color: ${theme.palette.codesnippet.background};
+    }
   `;
 
   //      width: 404px;

@@ -44,11 +44,21 @@ const Editor = () => {
     const options = [
       {
         label: 'unformat',
-        callback: () => {},
+        callback: () => {
+          removeStyleOnLine();
+        },
       },
       {
         label: 'code',
-        callback: () => {},
+        callback: () => {
+          makeCodeBlock();
+        },
+      },
+      {
+        label: 'snippet',
+        callback: () => {
+          makeInlineCode();
+        },
       },
       {
         label: 'quote',
@@ -59,9 +69,10 @@ const Editor = () => {
   };
 
   const modules = {
+    // syntax: true,
     toolbar: [
       [{ header: [1, 2, false] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block', 'script'],
       [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
       ['link', 'image'],
       ['clean'],
@@ -69,7 +80,21 @@ const Editor = () => {
   };
 
   // what does this do?!?
-  const formats = ['header', 'bold', 'italic', 'underline', 'strike', 'blockquote', 'list', 'bullet', 'indent', 'link', 'image'];
+  const formats = [
+    'header',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'blockquote',
+    'list',
+    'bullet',
+    'indent',
+    'link',
+    'image',
+    'code-block',
+    'script',
+  ];
 
   // handle editor functions
   useEffect(() => {
@@ -167,6 +192,7 @@ const Editor = () => {
       const [line, offset] = quill.getLine(range.index);
       const lineText = line.domNode.innerText;
 
+      // Handle header formatting
       const headerMatch = lineText.match(/^(#{1,3})\s/);
       if (headerMatch) {
         const headerLevel = headerMatch[1].length;
@@ -182,6 +208,28 @@ const Editor = () => {
 
         // Move cursor to the end of the line
         quill.setSelection(lineIndex + newText.length, 0);
+      }
+
+      // Handle code block formatting
+      const codeBlockMatch = lineText.match(/```([^`]+)```/s);
+      const inlineCodeMatch = lineText.match(/`([^`]+)`/);
+
+      if (codeBlockMatch) {
+        // const codeBlockText = codeBlockMatch[1];
+        // const codeBlockIndex = lineText.indexOf(codeBlockMatch[0]);
+        // quill.deleteText(range.index - lineText.length + codeBlockIndex, codeBlockMatch[0].length);
+        // quill.insertEmbed(range.index - lineText.length + codeBlockIndex, 'code-block', codeBlockText);
+        // quill.setSelection(range.index - lineText.length + codeBlockIndex + codeBlockText.length, 0);
+        makeCodeBlock(quill, range);
+      }
+      // Handle inline code formatting
+      else if (inlineCodeMatch) {
+        const inlineCodeText = inlineCodeMatch[1];
+        quill.deleteText(range.index - inlineCodeMatch[0].length, inlineCodeMatch[0].length);
+        quill.insertText(range.index - inlineCodeMatch[0].length, inlineCodeText); //, 'code', true);
+        quill.setSelection(range.index - inlineCodeMatch[0].length, inlineCodeText.length);
+        makeInlineCode();
+        quill.setSelection(range.index - 2, 0);
       }
 
       // const horizontalLineMatch = lineText.match(/^---\s*$/);
@@ -203,6 +251,36 @@ const Editor = () => {
     };
   }, []);
 
+  const makeCodeBlock = (_quill = undefined, _range = undefined) => {
+    // const quill = _quill || quillRef.current?.getEditor();
+    // if (!quill) return;
+    // const range = _range || quill.getSelection();
+    // if (!range) return;
+
+    // const qFormats = quill.getFormat(range);
+    // const isCodeBlock = qFormats['code-block'] === true;
+    // // if (isCodeBlock) {
+    // //   quill.removeFormat(range.index, range.length);
+    // // } else
+    // quill.format('code-block', !isCodeBlock);
+
+    // Select the button using querySelector
+    let codeblockButton = document.querySelector('.ql-code-block') as HTMLButtonElement; // You can also use a more specific selector
+    codeblockButton.click();
+  };
+
+  const makeInlineCode = () => {
+    // Select the button using querySelector
+    let inlineCodeButton = document.querySelector('.ql-script') as HTMLButtonElement; // You can also use a more specific selector
+    inlineCodeButton.click();
+  };
+
+  const removeStyleOnLine = () => {
+    // Select the button using querySelector
+    let cleanLineButton = document.querySelector('.ql-clean') as HTMLButtonElement; // You can also use a more specific selector
+    cleanLineButton.click();
+  };
+
   /*
   https://medium.com/@makenakong/how-to-customize-the-quill-toolbar-with-react-and-custom-blots-512a7b465339
   */
@@ -213,11 +291,13 @@ const Editor = () => {
       const editorElement = document.querySelector('.ql-editor');
       if (editorElement) {
         editorElement.addEventListener('contextmenu', handleContextMenu);
+        editorElement.addEventListener('mousedown', handleContextMenu);
       }
 
       return () => {
         if (editorElement) {
           editorElement.removeEventListener('contextmenu', handleContextMenu);
+          editorElement.addEventListener('mousedown', handleContextMenu);
         }
       };
     });

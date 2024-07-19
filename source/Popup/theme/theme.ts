@@ -52,6 +52,10 @@ const light = createTheme({
       paper: '#f4f5fd',
       background: '#000', //101010
     },
+    codesnippet: {
+      background: '#b5a67f',
+      text: '#fff',
+    },
     link: {
       main: '#f064a3', // Define your custom link color
     },
@@ -103,6 +107,10 @@ const dark = createTheme({
       paper: '#908d96', // NOT USED
       background: '#292929', //101010
     },
+    codesnippet: {
+      background: '#b5a67f',
+      text: '#fff',
+    },
     link: {
       main: '#fd69ac', // Define your custom link color
     },
@@ -153,6 +161,10 @@ const classic = createTheme({
       inactive: 'rgb(232 219 177)', // INACTIVE TABS: '#d6c59c'
       paper: '#908d96',
       background: '#7b87ba', // Dull Blue: '#7b87ba' // BEHIND TABS - PURPLE: '#8c74cd', BRIGHT BLUE: '#768df5'
+    },
+    codesnippet: {
+      background: '#b5a67f',
+      text: '#fff',
     },
     link: {
       main: '#768df5', // Define your custom link color

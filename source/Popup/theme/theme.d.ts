@@ -6,6 +6,11 @@ type ScrollColorOptions = {
   track?: string;
 };
 
+type CodeSnippetColorOptions = {
+  background?: string;
+  text?: string;
+};
+
 declare module '@mui/material/styles' {
   interface Palette {
     tertiary: PaletteColorOptions;
@@ -19,6 +24,13 @@ declare module '@mui/material/styles' {
   }
   interface PaletteOptions {
     scrollbar?: ScrollColorOptions;
+  }
+
+  interface Palette {
+    codesnippet: CodeSnippetColorOptions;
+  }
+  interface PaletteOptions {
+    codesnippet?: CodeSnippetColorOptions;
   }
 
   interface Palette {
