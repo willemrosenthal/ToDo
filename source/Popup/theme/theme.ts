@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import './theme.d.ts';
 
 const theme = createTheme({
   palette: {
@@ -60,7 +61,6 @@ const light = createTheme({
       main: '#f064a3', // Define your custom link color
     },
     text: {
-      main: '#333',
       primary: '#333',
       secondary: '#555', // Example of a secondary text color
     },
@@ -115,7 +115,6 @@ const dark = createTheme({
       main: '#fd69ac', // Define your custom link color
     },
     text: {
-      main: '#333',
       primary: '#ebebeb', //ebe6e4
       secondary: '#baafba', // fafafa
     },
@@ -172,13 +171,56 @@ const classic = createTheme({
     text: {
       primary: '#3e3131', //TEXT
       secondary: '#4d3622', // Inactive tab Text
-      main: '#333', // UNUSED
     },
   },
   // typography: {
   //   fontFamily: 'Arial, sans-serif',
   //   fontSize: 14,
   // },
+});
+
+const custom = createTheme({
+  palette: {
+    primary: {
+      main: '#b79df4',
+    },
+    secondary: {
+      main: '#f49eec',
+    },
+    tertiary: {
+      main: '#17d2e3',
+    },
+    scrollbar: {
+      thumb: 'rgba(123, 135, 186, 0.5)', // blue: 'rgba(118, 141, 245, 0.5)', // PURPLE '#a692b3', // brighter blue
+      track: 'rgba(123, 135, 186, 0.2)', // blue: 'rgba(118, 141, 245, 0.2)', // PURPLE: 'rgba(188, 175, 196, 0.3)',
+    },
+    border: {
+      main: 'rgb(232 219 177)', // lighter: '#ebdeb5', // DARKER: #cfba8a   // LIGHTER: #ebdeb5
+    },
+    error: {
+      main: '#ef5350',
+    },
+    warning: {
+      main: '#ff9800',
+    },
+    background: {
+      default: 'rgb(255, 255, 214)', //46424f //3f3f3f //505050
+      inactive: 'rgb(232 219 177)', // INACTIVE TABS: '#d6c59c'
+      paper: '#908d96',
+      background: '#7b87ba', // Dull Blue: '#7b87ba' // BEHIND TABS - PURPLE: '#8c74cd', BRIGHT BLUE: '#768df5'
+    },
+    codesnippet: {
+      background: '#b5a67f',
+      text: '#fff',
+    },
+    link: {
+      main: '#768df5', // Define your custom link color
+    },
+    text: {
+      primary: '#3e3131', //TEXT
+      secondary: '#4d3622', // Inactive tab Text
+    },
+  },
 });
 
 const themes = {

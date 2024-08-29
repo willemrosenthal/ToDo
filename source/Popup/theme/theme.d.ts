@@ -1,57 +1,40 @@
-// import { PaletteColorOptions } from '@mui/material/styles';
-import { PaletteColorOptions, PaletteOptions, TypeBackground } from '@mui/material/styles';
+import { Theme, ThemeOptions } from '@mui/material/styles';
 
-type ScrollColorOptions = {
-  thumb?: string;
-  track?: string;
-};
-
-type CodeSnippetColorOptions = {
-  background?: string;
-  text?: string;
-};
-
-declare module '@mui/material/styles' {
-  interface Palette {
-    tertiary: PaletteColorOptions;
-  }
-  interface PaletteOptions {
-    tertiary?: PaletteColorOptions;
-  }
-
-  interface Palette {
-    scrollbar: ScrollColorOptions;
-  }
-  interface PaletteOptions {
-    scrollbar?: ScrollColorOptions;
-  }
-
-  interface Palette {
-    codesnippet: CodeSnippetColorOptions;
-  }
-  interface PaletteOptions {
-    codesnippet?: CodeSnippetColorOptions;
-  }
-
-  interface Palette {
-    border: PaletteColorOptions;
-  }
-  interface PaletteOptions {
-    border?: PaletteColorOptions;
-  }
-
-  interface TypeBackground {
-    inactive?: string;
-    background?: string;
-  }
+interface CustomPalette {
+  tertiary?: {
+    main: string;
+    light: string;
+    dark: string;
+  };
+  scrollbar?: {
+    thumb: string;
+    track: string;
+  };
+  codesnippet?: {
+    background: string;
+    text: string;
+  };
+  border?: {
+    main: string;
+  };
+  link?: {
+    main: string;
+  };
 }
 
-declare module '@mui/material' {
-  interface Palette {
-    background: TypeBackground;
+interface CustomBackground {
+  inactive?: string;
+  background?: string;
+}
+
+declare module '@mui/material/styles' {
+  interface Theme {
+    palette: CustomPalette & Theme['palette'];
+    background: CustomBackground & Theme['palette']['background'];
   }
 
-  interface PaletteOptions {
-    background?: Partial<TypeBackground>;
+  interface ThemeOptions {
+    palette?: CustomPalette & ThemeOptions['palette'];
+    background?: CustomBackground & ThemeOptions['background'];
   }
 }

@@ -3,13 +3,12 @@ import './ContextMenu.scss';
 import { Point, contextAnchorEl, contextMenuData, showContextMenu } from '../../signal/contextMenu';
 import { Button, Fade, Menu, MenuItem, MenuList } from '../../../../node_modules/@mui/material/index';
 import styled from 'styled-components';
-import { debugMode } from '../../Main';
 import { effect, useSignalEffect } from '../../../../node_modules/@preact/signals-react/dist/signals';
 
 const debugDontCloseMenu = true;
 
 const ContextMenu = () => {
-  const { id, options, pos, className, useMousePos } = contextMenuData.value;
+  const { options, pos, className, useMousePos } = contextMenuData.value;
 
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const divRef = useRef(null);
@@ -120,6 +119,7 @@ const ContextMenu = () => {
       }}
       transformOrigin={{
         vertical: 'top',
+        horizontal: 'left',
         // horizontal: 'center',
       }}
     >
@@ -132,7 +132,7 @@ const ContextMenu = () => {
             <MenuItem
               key={key}
               onClick={() => {
-                o.callback(id);
+                o.callback(i); // was id
                 showContextMenu.value = false;
               }}
             >

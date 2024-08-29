@@ -1,5 +1,5 @@
-import { batch, effect, signal } from "@preact/signals-react";
-import { findLowestMissingId } from "../utils/utils";
+import { batch, effect, signal } from '@preact/signals-react';
+import { findLowestMissingId } from '../utils/utils';
 
 // default data
 const initialTab: Tab = {
@@ -36,7 +36,7 @@ export type StoredData = {
 export type TabUpdateType = {
   content?: string;
   name?: string;
-}
+};
 
 // signals
 export const storeData = signal<StoredData>(initialStore);
@@ -83,8 +83,8 @@ export const saveTab = (update: TabUpdateType) => {
       ...storeData.value.tabs,
       [id]: {
         ...(existingTab && existingTab),
-        ...(update.content && {content: update.content}),
-        ...(update.name && {name: update.name}),
+        ...(update.content && { content: update.content }),
+        ...(update.name && { name: update.name }),
       },
     },
   };
@@ -95,7 +95,7 @@ export function createTab(name = '', defaultContent = ' '): Tab {
   const newTabId = findLowestMissingId(s.tabOrder);
   const newTab: Tab = {
     id: newTabId,
-    name: name || `new-tab-${newTabId+1}`,
+    name: name || `new-tab-${newTabId + 1}`,
     content: defaultContent,
   };
   batch(() => {
@@ -152,21 +152,20 @@ function saveInLocal() {
 export function getFromLocal() {
   console.log('LOADING');
   const res = localStorage.getItem(todoDataKey);
-  console.log("LOADED:", res);
+  console.log('LOADED:', res);
   // check date time:
-  
+
   if (res) {
     const parsed: StoredData = JSON.parse(res);
     const parsedTimestamp = parsed.timeStamp || 0;
-    const storedTiemstamp = storeData.timeStamp || -1;
+    const storedTiemstamp = storeData.value.timeStamp || -1;
     if (parsedTimestamp > storedTiemstamp) {
-      batch(()=> {
+      batch(() => {
         storeData.value = JSON.parse(res);
         dataLoaded.value = true;
         console.log('loaded values from local storage');
       });
-    }
-    else {
+    } else {
       dataLoaded.value = true;
     }
     requestAnimationFrame(() => {

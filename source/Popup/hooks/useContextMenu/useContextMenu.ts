@@ -29,7 +29,7 @@ export const useContextMenu = () => {
 
     const pos: Point = { x: e.clientX, y: e.clientY };
     batch(() => {
-      contextAnchorEl.value = e.currentTarget;
+      contextAnchorEl.value = e.currentTarget as HTMLElement;
       contextMenuData.value = {
         data: Array.isArray(data) ? data : [data],
         options,

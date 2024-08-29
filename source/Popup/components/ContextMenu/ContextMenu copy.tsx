@@ -4,7 +4,7 @@ import { Point, contextMenuData, showContextMenu } from '../../signal/contextMen
 import { Button } from '../../../../node_modules/@mui/material/index';
 
 const ContextMenu = () => {
-  const { title, id, options, pos, className } = contextMenuData.value;
+  const { title, options, pos, className } = contextMenuData.value;
 
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
@@ -62,7 +62,7 @@ const ContextMenu = () => {
             type='button'
             key={key}
             onClick={() => {
-              o.callback(id);
+              o.callback(i); // was id
               showContextMenu.value = false;
             }}
           >

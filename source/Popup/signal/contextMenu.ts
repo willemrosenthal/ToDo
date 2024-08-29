@@ -2,7 +2,7 @@ import { signal } from '@preact/signals-react';
 
 export type ContextOptions = {
   label: string;
-  callback: (data: number[]) => void;
+  callback: (data: number[] | number | undefined) => void;
 };
 export type Point = {
   x: number;

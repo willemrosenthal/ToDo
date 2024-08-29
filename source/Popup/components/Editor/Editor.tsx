@@ -130,7 +130,8 @@ const Editor = () => {
       } else if (isCtrlOrCmd && event.key === 'l') {
         event.preventDefault();
         const range = quill.getSelection();
-        if (range && !range.isCollapsed) {
+        if (range) {
+          //if (range && !range.isCollapsed) {
           const text = quill.getText(range.index, range.length).trim();
           console.log('TEXT:', text);
           const qFormats = quill.getFormat(range);
