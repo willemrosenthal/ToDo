@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { HexAlphaColorPicker } from 'react-colorful';
+import { HexAlphaColorPicker, HexColorInput } from 'react-colorful';
 import { customPalette } from '../../signal/settings'
 import { PaletteColors } from '../../theme/theme';
 import { useSignalEffect } from '@preact/signals-react';
 import { saveTab } from '../../signal/todoData';
 // import styles from './ColorPicker.module.css';
+import './ColorPicker.css'
 
 type ColorPickerProps = {
   label: string;
@@ -61,14 +62,17 @@ const ColorPicker = ({ label, sublabel = '', currentColor = '#FFFFFF', setter }:
     <>
       {
         (label && sublabel) &&
-        <div style={{ width: '250px' }}>
+        <div style={{ width: '170px' }}>
           <div style={{ padding: '16px 16px', width: 'fit-content', position: 'fixed'}}>
             <div style={{marginBottom: '16px'}}>
               <label>{label}</label>
               <span style={{margin: '6px'}}>-</span>
               {sublabel && <label>{sublabel}</label>}
             </div>
-            <HexAlphaColorPicker color={color} onChange={setColor} />
+            <section className='small'>
+              <HexAlphaColorPicker color={color} onChange={setColor} />
+              <HexColorInput color={color} onChange={setColor} />
+            </section>
           </div>
         </div>
       }

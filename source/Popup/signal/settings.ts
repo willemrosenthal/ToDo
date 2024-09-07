@@ -8,10 +8,10 @@ export type PaletteName = 'custom' | 'light' | 'dark' | 'classic';
 
 export type Settings = {
   palette: PaletteColors;
-  selectedPalette: PaletteName;
+  selectedPalette: PaletteName | string;
 };
 
-export const selectedPaletteName = signal<PaletteName>('classic');
+export const selectedPaletteName = signal<PaletteName | string>('classic');
 export const customPalette = signal<PaletteColors | Palette>(themes['classic'].palette);
 
 // export const currentPallette = signal<PaletteColors | Palette>(themes['classic'].palette);

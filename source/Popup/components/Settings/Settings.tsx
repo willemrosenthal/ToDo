@@ -81,7 +81,7 @@ const Settings = () => {
         },
       }}
     >
-        <div style={{ display: 'flex', flexDirection: 'row', height: '100%'}}>
+        <div style={{ display: 'flex', flexDirection: 'row', height: '100vw'}}>
           <div style={{padding: '13px', height: '100%', borderRight: '2px solid'}}>
             <>
               <Select
