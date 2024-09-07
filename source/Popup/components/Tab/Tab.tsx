@@ -3,7 +3,7 @@ import './Tab.scss';
 import { deleteTab, getCurrentTabId, saveTab } from '../../signal/todoData';
 import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
 import { Point } from '../../signal/contextMenu';
-import { useTheme } from '@emotion/react';
+import { useTheme } from '@mui/material/styles';
 
 type TabProps = {
   title: string;
@@ -82,9 +82,14 @@ const Tab = ({ title, index, chooseTab, id, className = '', style = {}, newTab }
         backgroundColor: selectedClass() ? theme.palette.background.default : theme.palette.background.inactive,
         color: selectedClass() ? theme.palette.text.primary : theme.palette.text.secondary,
         // borderColor: theme.palette.tertiary.dark,
+
+        // @ts-ignore
         borderLeft: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        // @ts-ignore
         borderTop: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        // @ts-ignore
         borderRight: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        // @ts-ignore
         borderBottom: selectedClass() ? '2px solid transparent' : `2px solid ${theme.palette.border.main}`,
         ...(style && style),
       }}

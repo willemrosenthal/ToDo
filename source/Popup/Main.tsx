@@ -7,7 +7,7 @@ import Editor from './components/Editor/Editor';
 import TabBar from './components/TabBar/TabBar';
 import ContextMenu from './components/ContextMenu/ContextMenu';
 import { showContextMenu } from './signal/contextMenu';
-import { useTheme } from '@emotion/react';
+import { useTheme } from '@mui/material/styles';
 import styled from 'styled-components';
 
 // function openWebPage(url: string): Promise<Tabs.Tab> {
@@ -19,6 +19,7 @@ import PopoutButton from './components/PopoutButton/PopoutButton';
 import { popoutSettings } from './settings/settings';
 import { isStandalone } from './signal/popout';
 import { getFromLocal } from './signal/todoData';
+import Settings from './components/Settings/Settings';
 
 const closeWhenFocusIsLost = false;
 
@@ -77,6 +78,7 @@ const Main: React.FC = () => {
 
     sub {
       background-color: ${theme.palette.codesnippet.background};
+      color: ${theme.palette.codesnippet.text};
     }
   `;
 
@@ -99,6 +101,7 @@ const Main: React.FC = () => {
 
   return (
     <div className={isStandalone.value ? 'standaloneContainer' : ''}>
+      <Settings />
       <StyledMainContainer className={'main-container ' + (isStandalone.value ? 'standalone' : '')}>
         {/* <div className='main-container' style={style}> */}
         {/* {showContextMenu.value && <ContextMenu />} */}

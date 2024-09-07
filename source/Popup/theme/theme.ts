@@ -1,5 +1,49 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, ThemeOptions } from '@mui/material/styles';
 import './theme.d.ts';
+
+export type PaletteColors = {
+  primary: {
+    main: string;
+  };
+  secondary: {
+    main: string;
+  };
+  tertiary: {
+    main: string;
+    light: string;
+    dark: string;
+  };
+  scrollbar: {
+    thumb: string;
+    track: string;
+  };
+  border: {
+    main: string;
+  };
+  error: {
+    main: string;
+  };
+  warning: {
+    main: string;
+  };
+  background: {
+    default: string;
+    inactive: string;
+    paper: string;
+    background: string;
+  };
+  codesnippet: {
+    background: string;
+    text: string;
+  };
+  link: {
+    main: string;
+  };
+  text: {
+    primary: string;
+    secondary: string;
+  };
+};
 
 const theme = createTheme({
   palette: {
@@ -21,55 +65,41 @@ const light = createTheme({
   palette: {
     primary: {
       main: '#FCFCFC',
-      // main: '#ff9100',
-      // light: '#ffB144',
     },
     secondary: {
-      // main: '#E0C2FF',
       main: '#ba68c8',
-      // light: '#fcd674'
     },
     tertiary: {
       main: '#17d2e3',
-      // light: '#d05ce3',
-      // dark: '#6a0080',
+      light: '#d05ce3',
+      dark: '#6a0080',
     },
     scrollbar: {
       thumb: '#908d96',
       track: 'rgba(144,141,150, 0.3)',
     },
     border: {
-      main: '#999999', //656565  //594c59 main: 'rgba(255, 255, 255, 0.5)',
-    },
-    error: {
-      main: '#ef5350',
-    },
-    warning: {
-      main: '#ff9800',
+      main: '#999999',
     },
     background: {
       default: '#f3f3f3',
-      inactive: '#484351', //707070
+      inactive: '#484351',
       paper: '#f4f5fd',
-      background: '#000', //101010
+      background: '#000',
     },
     codesnippet: {
       background: '#b5a67f',
       text: '#fff',
     },
     link: {
-      main: '#f064a3', // Define your custom link color
+      main: '#f064a3',
     },
     text: {
       primary: '#333',
-      secondary: '#555', // Example of a secondary text color
+      secondary: '#555',
     },
   },
-  // typography: {
-  //   fontFamily: 'Arial, sans-serif',
-  //   fontSize: 14,
-  // },
-});
+} as ThemeOptions);
 
 const dark = createTheme({
   palette: {
@@ -123,7 +153,7 @@ const dark = createTheme({
   //   fontFamily: 'Arial, sans-serif',
   //   fontSize: 14,
   // },
-});
+} as ThemeOptions);
 
 const classic = createTheme({
   palette: {
@@ -177,7 +207,7 @@ const classic = createTheme({
   //   fontFamily: 'Arial, sans-serif',
   //   fontSize: 14,
   // },
-});
+} as ThemeOptions);
 
 const custom = createTheme({
   palette: {
@@ -221,7 +251,7 @@ const custom = createTheme({
       secondary: '#4d3622', // Inactive tab Text
     },
   },
-});
+} as ThemeOptions);
 
 const themes = {
   light,

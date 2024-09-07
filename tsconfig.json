@@ -21,10 +21,10 @@
 		"jsx": "react-jsx"
 	},
 	"include": [
+		"source/Popup/theme/theme.d.ts",
+		"source/**/*.d.ts",
 		"source/**/*.ts",
 		"source/**/*.tsx",
-		"source/**/*.d.ts",
-		"source/Popup/theme/theme.d.ts",
 		"source",
 		"webpack.config.js"
 	]

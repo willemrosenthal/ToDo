@@ -7,7 +7,7 @@ import 'react-quill/dist/quill.snow.css';
 import './Editor.scss';
 import { currentTab, saveTab } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';
-import { useTheme } from '@emotion/react';
+import { useTheme } from '@mui/material/styles';
 import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
 
 const Editor = () => {
@@ -18,6 +18,7 @@ const Editor = () => {
 
   useEffect(() => {
     const quillStyleElement = document.createElement('style');
+    // @ts-ignore
     quillStyleElement.innerHTML = `.quill a { color: ${theme.palette.link.main} !important; }`;
     document.head.appendChild(quillStyleElement);
 
@@ -325,6 +326,7 @@ const Editor = () => {
 
   const style = {
     // borderColor: theme.palette.border.main,
+    // @ts-ignore
     borderTop: `2px solid ${theme.palette.border.main}`,
     backgroundColor: theme.palette.background.default,
   };

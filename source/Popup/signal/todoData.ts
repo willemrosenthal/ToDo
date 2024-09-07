@@ -1,5 +1,8 @@
 import { batch, effect, signal } from '@preact/signals-react';
 import { findLowestMissingId } from '../utils/utils';
+import { selectedPaletteName, Settings } from './settings';
+import { customPalette } from './settings'
+import { PaletteColors } from '../theme/theme';
 
 // default data
 const initialTab: Tab = {
@@ -32,6 +35,7 @@ export type StoredData = {
   currentTabIndex: number;
   tabOrder: number[];
   timeStamp?: number;
+  settings?: Settings;
 };
 export type TabUpdateType = {
   content?: string;
@@ -87,6 +91,10 @@ export const saveTab = (update: TabUpdateType) => {
         ...(update.name && { name: update.name }),
       },
     },
+    settings: {
+      palette: customPalette.value as PaletteColors,
+      selectedPalette: selectedPaletteName.value
+    }
   };
 };
 
@@ -159,10 +167,20 @@ export function getFromLocal() {
     const parsed: StoredData = JSON.parse(res);
     const parsedTimestamp = parsed.timeStamp || 0;
     const storedTiemstamp = storeData.value.timeStamp || -1;
+    const parsedSettings = parsed.settings;
     if (parsedTimestamp > storedTiemstamp) {
       batch(() => {
         storeData.value = JSON.parse(res);
         dataLoaded.value = true;
+        if (parsedSettings) {
+          if (parsedSettings.palette) {
+            customPalette.value = parsedSettings.palette;
+          }
+          if (parsedSettings.selectedPalette) {
+            selectedPaletteName.value = parsedSettings.selectedPalette;
+          }
+        }
+        // customPalette.value = parsedSettings as PaletteColors;
         console.log('loaded values from local storage');
       });
     } else {

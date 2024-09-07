@@ -3,9 +3,12 @@ import './TabBar.scss';
 import { useSignalEffect } from '@preact/signals-react';
 import Tab from '../Tab/Tab';
 import { storeData, createTab, setCurrentTab, dataLoaded } from '../../signal/todoData';
-import { useTheme } from '@emotion/react';
+import { useTheme } from '@mui/material/styles';
 import { isStandalone } from '../../signal/popout';
 import PopoutButton from '../PopoutButton/PopoutButton';
+import IconButton from '../IconButton/IconButton';
+import { paletteDrawerOpen } from '../../signal/settings'
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 
 type TabDisplayType = {
   title: string;
@@ -87,8 +90,11 @@ const TabBar = () => {
   const newTabButtonStyle = {
     backgroundColor: 'trasparent',
     // borderBottom: theme.palette.border.main,
+    // @ts-ignore
     borderTop: `2px dashed ${theme.palette.border.main}`,
+    // @ts-ignore
     borderLeft: `2px dashed ${theme.palette.border.main}`,
+    // @ts-ignore
     borderRight: `2px dashed ${theme.palette.border.main}`,
   };
 
@@ -104,9 +110,8 @@ const TabBar = () => {
   return (
     <div className='tab-bar'>
       <div className='tab-bar-tabs' ref={tabBarRef}>
-        {
-          !isStandalone.value && <PopoutButton />
-        }
+        <IconButton icon={faGear} callback={()=>{paletteDrawerOpen.value = true}} />
+        {!isStandalone.value && <PopoutButton />}
         {tabItems}
         <Tab title={'+'} key={'new-tab-button'} chooseTab={newTab} className='new-tab-button' style={newTabButtonStyle} />
       </div>

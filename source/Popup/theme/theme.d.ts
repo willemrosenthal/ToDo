@@ -1,5 +1,4 @@
-import { Theme, ThemeOptions } from '@mui/material/styles';
-
+// import { PaletteOptions, PaletteColorOptions } from '@mui/material/styles';
 interface CustomPalette {
   tertiary?: {
     main: string;
@@ -22,19 +21,16 @@ interface CustomPalette {
   };
 }
 
-interface CustomBackground {
-  inactive?: string;
-  background?: string;
-}
-
 declare module '@mui/material/styles' {
-  interface Theme {
-    palette: CustomPalette & Theme['palette'];
-    background: CustomBackground & Theme['palette']['background'];
+  interface Palette extends CustomPalette {}
+  interface PaletteOptions extends CustomPalette {}
+
+  // Ensure that 'border', 'link', and other custom properties inherit from PaletteColorOptions if necessary
+  interface PaletteColorOptions {
+    main: string;
   }
 
-  interface ThemeOptions {
-    palette?: CustomPalette & ThemeOptions['palette'];
-    background?: CustomBackground & ThemeOptions['background'];
+  interface PaletteColor {
+    main?: string;
   }
 }
