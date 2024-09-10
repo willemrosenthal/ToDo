@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import ColorPicker from '../ColorPicker/ColorPicker'
 import { customPalette, paletteDrawerOpen, selectedPaletteName, PaletteName } from '../../signal/settings'
 import { saveTab } from '../../signal/todoData';
+import StyledScrollBar from '../StyledWrapper/StyledScrollBar';
 
 const Settings = () => {
 
@@ -81,8 +82,9 @@ const Settings = () => {
         },
       }}
     >
-        <div style={{ display: 'flex', flexDirection: 'row', height: '100vw'}}>
-          <div style={{padding: '13px', height: '100%', borderRight: '2px solid'}}>
+      <StyledScrollBar>
+        <div style={{ display: 'flex', flexDirection: 'row', minHeight: '100vw'}}>
+          <div style={{padding: '13px', minHeight: '100%', borderRight: '2px solid'}}>
             <>
               <Select
                 // labelId="theme-select-label"
@@ -106,6 +108,7 @@ const Settings = () => {
             <ColorPicker label={cat} sublabel={subCat} currentColor={currentColor} setter={setCurrent}  />
           </div>
         </div>
+      </StyledScrollBar>
     </Drawer>
   );
 };

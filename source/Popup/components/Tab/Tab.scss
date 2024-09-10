@@ -14,10 +14,13 @@
   
   font-family: Helvetica, Arial, sans-serif;
   font-size: 13px;
+  position: relative;
+}
 
+.tab-text-cutoff {
   white-space: nowrap !important;         /* Prevents the text from wrapping */
   overflow: hidden !important;            /* Ensures that the overflowed text is hidden */
-  text-overflow: ellipsis !important;  
+  text-overflow: ellipsis !important; 
 }
 
 .tab-label {
@@ -48,4 +51,14 @@ input {
   width: 90px;
   margin-top: 0px;
   // text-align: center;
+}
+
+.tab-bottom {
+  height: 2px;
+  width: calc(100% + 4px);
+  // background-color: aqua;
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  z-index: 1000;
 }

@@ -53,6 +53,8 @@ const Tab = ({ title, index, chooseTab, id, className = '', style = {}, newTab }
     chooseTab(index);
   };
 
+  const isSelected = () => getCurrentTabId() === id;
+
   const selectedClass = () => {
     // console.log(`⭐️⭐️⭐️ ${getCurrentTabId()}`, id);
     return getCurrentTabId() === id ? 'selected' : '';
@@ -100,7 +102,7 @@ const Tab = ({ title, index, chooseTab, id, className = '', style = {}, newTab }
       tabIndex={id}
       onContextMenu={handleOnContextMenu}
     >
-      <>
+      <div className='tab-text-cutoff'>
         {!editNameMode ? (
           <div className='tab-label'>{tabTitle}</div>
         ) : (
@@ -118,7 +120,9 @@ const Tab = ({ title, index, chooseTab, id, className = '', style = {}, newTab }
             />
           </>
         )}
-      </>
+        { /* @ts-ignore */ }
+        <div className='tab-bottom' style={{ backgroundColor: theme.palette.border.main, opacity: isSelected() ? '0' : '100' }}/>
+      </div>
     </div>
   );
 };
