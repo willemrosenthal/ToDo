@@ -105,6 +105,45 @@ const Editor = () => {
     'script',
   ];
 
+  const findInlineCodeLength = (contents: any, offset: number) => {
+    let c = 0;
+    for (let i = 0; i < contents.ops.length; i++) {
+      const op = contents.ops[i];
+      const delta = op.insert.length;
+      if (op.attributes?.script === 'sub' && c + delta >= offset) {
+        return delta;
+      }
+      if (op.insert) {
+        c += delta;
+      }
+    }
+    return 0;
+  };
+
+  // handle editor functions
+  const handleKeyDown = (event: KeyboardEvent) => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill) return;
+
+    if (event.key === 'Backspace') {
+      const range = quill.getSelection();
+      if (range) {
+        const [line, offset] = quill.getLine(range.index);
+        const contentsBack = quill.getContents(range.index - 1);
+        if (contentsBack.ops?.length && contentsBack.ops.length > 1) {
+          if (contentsBack.ops[0].attributes?.script === 'sub') {
+            event.preventDefault();
+            const lineContents = quill.getContents(range.index - offset);
+            const inlineCodeLength = findInlineCodeLength(lineContents, offset);
+            quill.setSelection(range.index - inlineCodeLength, inlineCodeLength);
+            makeInlineCode();
+            quill.setSelection(range.index, 0);
+          }
+        }
+      }
+    }
+  };
+
   // handle editor functions
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -134,7 +173,6 @@ const Editor = () => {
         if (range) {
           //if (range && !range.isCollapsed) {
           const text = quill.getText(range.index, range.length).trim();
-          console.log('TEXT:', text);
           const qFormats = quill.getFormat(range);
           if (qFormats.link) {
             // If the selected text is already a link, remove the link
@@ -221,7 +259,7 @@ const Editor = () => {
       }
 
       // Handle code block formatting
-      const codeBlockMatch = lineText.match(/```([^`]+)```/s);
+      const codeBlockMatch = lineText.match(/```([^`]+)```/);
       const inlineCodeMatch = lineText.match(/`([^`]+)`/);
 
       if (codeBlockMatch) {
@@ -234,12 +272,19 @@ const Editor = () => {
       }
       // Handle inline code formatting
       else if (inlineCodeMatch) {
+        const cursorAtEndOfInlineCode = (line: string, chunk: string, offset: number) => {
+          const chunkLength = chunk.length;
+          const previousChunk = line.slice(offset - chunkLength, offset);
+          return previousChunk === chunk;
+        };
+        const atEndOfChunk = cursorAtEndOfInlineCode(lineText, inlineCodeMatch[0], offset);
         const inlineCodeText = inlineCodeMatch[1];
-        quill.deleteText(range.index - inlineCodeMatch[0].length, inlineCodeMatch[0].length);
-        quill.insertText(range.index - inlineCodeMatch[0].length, inlineCodeText); //, 'code', true);
-        quill.setSelection(range.index - inlineCodeMatch[0].length, inlineCodeText.length);
+        const chunkEndIndex = atEndOfChunk ? range.index : range.index + inlineCodeMatch[1].length + 1;
+        quill.deleteText(chunkEndIndex - inlineCodeMatch[0].length, inlineCodeMatch[0].length);
+        quill.insertText(chunkEndIndex - inlineCodeMatch[0].length, inlineCodeText + '\u200C'); //, 'code', true);
+        quill.setSelection(chunkEndIndex - inlineCodeMatch[0].length, inlineCodeText.length);
         makeInlineCode();
-        quill.setSelection(range.index - 2, 0);
+        quill.setSelection(range.index - 1, 0);
       }
 
       // const horizontalLineMatch = lineText.match(/^---\s*$/);
@@ -333,7 +378,15 @@ const Editor = () => {
 
   return (
     <>
-      <ReactQuill style={style} ref={quillRef} value={value} onChange={setVal} modules={modules} formats={formats} />
+      <ReactQuill
+        style={style}
+        ref={quillRef}
+        value={value}
+        onChange={setVal}
+        onKeyDown={handleKeyDown}
+        modules={modules}
+        formats={formats}
+      />
     </>
   );
 };
