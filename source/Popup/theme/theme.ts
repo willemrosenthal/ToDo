@@ -138,8 +138,8 @@ const dark = createTheme({
       background: '#292929', //101010
     },
     codesnippet: {
-      background: '#b5a67f',
-      text: '#fff',
+      background: '#564f47',
+      text: '#cdc7b4',
     },
     link: {
       main: '#fd69ac', // Define your custom link color

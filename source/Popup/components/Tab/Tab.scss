@@ -21,11 +21,12 @@
   white-space: nowrap !important;         /* Prevents the text from wrapping */
   overflow: hidden !important;            /* Ensures that the overflowed text is hidden */
   text-overflow: ellipsis !important; 
+  width: 100%;
 }
 
 .tab-label {
   margin-top: 0px;
-  width: 100px;
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis !important;
 }
