@@ -171,7 +171,10 @@ module.exports = {
     new MiniCssExtractPlugin({filename: 'css/[name].css'}),
     // copy static assets
     new CopyWebpackPlugin({
-      patterns: [{from: 'source/assets', to: 'assets'}],
+      patterns: [{
+        from: `source/assets/icons/${process.env.NODE_ENV === 'production' ? 'prod' : 'dev'}`,
+        to: 'assets/icons'
+      }],
     }),
     // plugin to enable browser reloading in development mode
     extensionReloaderPlugin,

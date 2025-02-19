@@ -1,81 +1,95 @@
 import React, { useEffect, useState } from 'react';
 import { HexAlphaColorPicker, HexColorInput } from 'react-colorful';
-import { customPalette } from '../../signal/settings'
+import { customPalette } from '../../signal/settings';
 import { PaletteColors } from '../../theme/theme';
 import { useSignalEffect } from '@preact/signals-react';
 import { saveTab } from '../../signal/todoData';
 // import styles from './ColorPicker.module.css';
-import './ColorPicker.css'
+import './ColorPicker.css';
+
+import { cat, subCat } from '../Settings/Settings';
 
 type ColorPickerProps = {
-  label: string;
-  sublabel?: string;
   currentColor?: string;
   setter: (color: string) => void;
-  
 };
 
-const ColorPicker = ({ label, sublabel = '', currentColor = '#FFFFFF', setter }: ColorPickerProps) => {
-  
+const ColorPicker = ({ currentColor = '#FFFFFF', setter }: ColorPickerProps) => {
+  const [label, setLabel] = useState('');
+  const [sublabel, setSublabel] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+
+  useSignalEffect(() => {
+    setLabel(cat.value);
+    setSublabel(subCat.value);
+  });
+
   const current = label + '_' + sublabel;
   const [loadedColorTag, setLoadedColorTag] = useState(current);
 
   // const [currentColorTag, setCurrentColorTag] = useState('');
-
+  console.log(`🥰 ${currentColor} ${label} ${sublabel}`);
   const [color, setColor] = useState(currentColor);
-  const [iniitalColorSetting, setInitialColorSetting] = useState(false);
+  const [initialColorSetting, setInitialColorSetting] = useState(false);
 
-  
-  useEffect(()=>{
+  useEffect(() => {
     if (loadedColorTag !== current) {
       setLoadedColorTag(current);
       setColor(currentColor);
       setInitialColorSetting(true);
     }
-  }, [currentColor])
+  }, [currentColor]);
 
   useEffect(() => {
-    if (currentColor !== color) setter(color);
+    const handleMouseUp = () => {
+      if (isDragging && currentColor !== color) {
+        setter(color);
 
-    // dont continue if it was just the initial state getting set
-    if (iniitalColorSetting) {
-      setInitialColorSetting(false)
-      return;
-    }
-    
-    if (label && sublabel) {
-      const newPalette = JSON.parse(JSON.stringify(customPalette.value));
-      newPalette[label][sublabel] = color;
-    
-      customPalette.value = newPalette as PaletteColors;
-      saveTab({});
-    }
+        if (!initialColorSetting && label && sublabel) {
+          const newPalette = JSON.parse(JSON.stringify(customPalette.value));
+          newPalette[label][sublabel] = color;
+          customPalette.value = newPalette as PaletteColors;
+          saveTab({});
+        }
+      }
+      setIsDragging(false);
+      setInitialColorSetting(false);
+    };
 
-  }, [color]);
-
-  useSignalEffect(()=>{
-    console.log('🥰',customPalette.value);
-  })
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => window.removeEventListener('mouseup', handleMouseUp);
+  }, [color, isDragging, initialColorSetting, label, sublabel]);
 
   return (
     // <div className={styles.colorPicker}></div>
     <>
-      {
-        (label && sublabel) &&
+      {label && sublabel && (
         <div style={{ width: '170px' }}>
-          <div style={{ padding: '16px 16px', width: 'fit-content', position: 'fixed'}}>
-            <div style={{marginBottom: '16px'}}>
+          <div style={{ padding: '16px 16px', width: 'fit-content', position: 'fixed' }}>
+            <div style={{ marginBottom: '16px' }}>
               <label>{label}</label>
-              <span style={{margin: '6px'}}>-</span>
+              <span style={{ margin: '6px' }}>-</span>
               {sublabel && <label>{sublabel}</label>}
             </div>
-            <section className='small'>
+            <section className='small' onMouseDown={() => setIsDragging(true)}>
               <HexAlphaColorPicker color={color} onChange={setColor} />
-              <HexColorInput color={color} onChange={setColor} />
+              <HexColorInput
+                color={color}
+                onChange={(newColor) => {
+                  setColor(newColor);
+                  setter(newColor);
+                  if (label && sublabel) {
+                    const newPalette = JSON.parse(JSON.stringify(customPalette.value));
+                    newPalette[label][sublabel] = newColor;
+                    customPalette.value = newPalette as PaletteColors;
+                    saveTab({});
+                  }
+                }}
+              />
             </section>
           </div>
         </div>
-      }
+      )}
     </>
   );
 };
