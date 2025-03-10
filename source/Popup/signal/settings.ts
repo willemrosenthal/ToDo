@@ -12,7 +12,7 @@ export type Settings = {
 };
 
 export const selectedPaletteName = signal<PaletteName | string>('classic');
-export const customPalette = signal<PaletteColors | Palette>(themes['classic'].palette);
+export const customPalette = signal<PaletteColors | Palette>(themes['dark'].palette);
 
 // export const currentPallette = signal<PaletteColors | Palette>(themes['classic'].palette);
 export const currentTheme = signal<ThemeOptions>(themes['classic']);
@@ -21,8 +21,7 @@ export const paletteDrawerOpen = signal(false);
 
 effect(() => {
   currentTheme.value = themes[selectedPaletteName.value];
-  console.log('🌈', currentTheme.value);
-})
+});
 
 effect(() => {
   // update the custom theme if the `customPalette` changes

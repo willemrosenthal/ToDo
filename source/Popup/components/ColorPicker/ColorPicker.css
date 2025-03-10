@@ -26,3 +26,8 @@
   font-size: 12px;
   border: none;
 }
+.theme-color-picker {
+  position: relative;
+  transition: width 0.15s ease-in-out;
+  overflow: hidden;
+}

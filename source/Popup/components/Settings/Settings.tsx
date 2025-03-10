@@ -9,13 +9,14 @@ import { signal } from '@preact/signals-react';
 
 export const cat = signal('');
 export const subCat = signal('');
+export const customPaletteMenuOpen = signal(false);
 
 const Settings = () => {
   const toggleDrawer = (newOpen: boolean) => () => {
     paletteDrawerOpen.value = newOpen;
   };
 
-  const [currentColor, setCurrent] = useState(customPalette.value.primary.main);
+  const [currentColor, setCurrent] = useState(null);
 
   // cat and subcat
   // const [cat, setCat] = useState('');
@@ -59,7 +60,7 @@ const Settings = () => {
     });
   }, []);
 
-  const getCategrories = () => {
+  const getCategories = () => {
     return Object.entries(paletteList).map(([key, value]) => (
       <>
         <b>{key}</b>
@@ -69,8 +70,17 @@ const Settings = () => {
     ));
   };
 
+  customPaletteMenuOpen.value = selectedPaletteName.value === 'custom';
+
   const handleThemeSelect = (event: SelectChangeEvent) => {
     selectedPaletteName.value = event.target.value as PaletteName;
+    if (selectedPaletteName.value !== 'custom') {
+      cat.value = '';
+      subCat.value = '';
+      customPaletteMenuOpen.value = false;
+    } else {
+      customPaletteMenuOpen.value = true;
+    }
     saveTab({});
   };
 
@@ -103,10 +113,10 @@ const Settings = () => {
               <br />
               <br />
             </>
-            {selectedPaletteName.value === 'custom' && getCategrories()}
+            {selectedPaletteName.value === 'custom' && getCategories()}
           </div>
           <div style={{ height: '100%' }}>
-            <ColorPicker currentColor={currentColor} setter={setCurrent} />
+            <ColorPicker currentColor={currentColor || '#FFFFFF'} setter={setCurrent} />
           </div>
         </div>
       </StyledScrollBar>

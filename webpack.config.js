@@ -172,8 +172,9 @@ module.exports = {
     // copy static assets
     new CopyWebpackPlugin({
       patterns: [{
-        from: `source/assets/icons/${process.env.NODE_ENV === 'production' ? 'prod' : 'dev'}`,
-        to: 'assets/icons'
+        from: path.join(sourcePath, 'assets', 'icons', process.env.NODE_ENV === 'production' ? 'prod' : 'dev'),
+        to: 'assets/icons',
+        noErrorOnMissing: true
       }],
     }),
     // plugin to enable browser reloading in development mode
