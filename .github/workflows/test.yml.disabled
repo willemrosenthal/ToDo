@@ -1,6 +1,6 @@
 name: Test
 
-# on: [push] # Trigger on push events
+on: [push] # Trigger on push events
 
 jobs:
   test-env:
