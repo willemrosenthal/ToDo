@@ -1,3 +1,10 @@
+console.log('🔍 Environment check:');
+console.log('NOTION_TOKEN exists:', !!process.env.NOTION_TOKEN);
+console.log('NOTION_TOKEN format:', process.env.NOTION_TOKEN?.substring(0, 10) + '...');
+console.log('NOTION_PARENT_PAGE_ID:', process.env.NOTION_PARENT_PAGE_ID);
+console.log('NOTION_PARENT_PAGE_ID length:', process.env.NOTION_PARENT_PAGE_ID?.length);
+
+
 const { Client } = require('@notionhq/client');
 const fs = require('fs');
 const path = require('path');
@@ -75,6 +82,11 @@ async function syncDocs() {
 }
 
 syncDocs().catch((err) => {
+  console.log('🔍 Environment check:');
+console.log('NOTION_TOKEN exists:', !!process.env.NOTION_TOKEN);
+console.log('NOTION_TOKEN format:', process.env.NOTION_TOKEN?.substring(0, 10) + '...');
+console.log('NOTION_PARENT_PAGE_ID:', process.env.NOTION_PARENT_PAGE_ID);
+console.log('NOTION_PARENT_PAGE_ID length:', process.env.NOTION_PARENT_PAGE_ID?.length);
   console.error(err);
   process.exit(1);
 });
