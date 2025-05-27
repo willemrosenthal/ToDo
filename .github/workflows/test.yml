@@ -1,7 +1,15 @@
 name: Test
-  env:
-    TEST_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    TEST_SECRET: ${{ secrets.TEST_SECRET }}
-  run: |
-    echo ${#TEST_GITHUB_TOKEN}
-    echo ${#TEST_SECRET}
+
+on: [push] # Trigger on push events
+
+jobs:
+  test-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Environment Variables
+        env:
+          TEST_GITHUB_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          TEST_SECRET: ${{ secrets.NOTION_PARENT_PAGE_ID }}
+        run: |
+          echo ${#NOTION_TOKEN}
+          echo ${#NOTION_PARENT_PAGE_ID}
