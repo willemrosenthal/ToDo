@@ -36,6 +36,7 @@
     "@notionhq/client": "^3.1.2",
     "@preact/signals-react": "^2.2.0",
     "advanced-css-reset": "^1.2.2",
+    "dotenv": "^16.5.0",
     "glob": "^11.0.2",
     "gray-matter": "^4.0.3",
     "react": "^17.0.2",
