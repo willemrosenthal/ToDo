@@ -1,8 +1,8 @@
-console.log('🔍 Environment check:');
-console.log('NOTION_TOKEN exists:', !!process.env.NOTION_TOKEN);
-console.log('NOTION_TOKEN format:', process.env.NOTION_TOKEN?.substring(0, 10) + '...');
-console.log('NOTION_PARENT_PAGE_ID:', process.env.NOTION_PARENT_PAGE_ID);
-console.log('NOTION_PARENT_PAGE_ID length:', process.env.NOTION_PARENT_PAGE_ID?.length);
+// console.log('🔍 Environment check:');
+// console.log('NOTION_TOKEN exists:', !!process.env.NOTION_TOKEN);
+// console.log('NOTION_TOKEN format:', process.env.NOTION_TOKEN?.substring(0, 10) + '...');
+// console.log('NOTION_PARENT_PAGE_ID:', process.env.NOTION_PARENT_PAGE_ID);
+// console.log('NOTION_PARENT_PAGE_ID length:', process.env.NOTION_PARENT_PAGE_ID?.length);
 
 
 const { Client } = require('@notionhq/client');
@@ -22,14 +22,42 @@ const notion = new Client({ auth: notionToken });
 const rootPageId = notionParentPageId;
 
 // Converts markdown to Notion blocks (very basic)
+// function mdToBlocks(md) {
+//   return md.split('\n').map(line => ({
+//     object: 'block',
+//     type: 'paragraph',
+//     paragraph: {
+//       rich_text: [
+//         {
+//           type: 'text',
+//           text: {
+//             content: line || ' '
+//           }
+//         }
+//       ]
+//     }
+//   }));
+// }
+
+// SKIP EMPTY LINE VERSION:
 function mdToBlocks(md) {
-  return md.split('\n').map(line => ({
-    object: 'block',
-    type: 'paragraph',
-    paragraph: {
-      text: [{ type: 'text', text: { content: line || ' ' } }]
-    }
-  }));
+  return md
+    .split('\n')
+    .filter(line => line.trim().length > 0)
+    .map(line => ({
+      object: 'block',
+      type: 'paragraph',
+      paragraph: {
+        rich_text: [
+          {
+            type: 'text',
+            text: {
+              content: line
+            }
+          }
+        ]
+      }
+    }));
 }
 
 // Recursively create nested structure
@@ -82,11 +110,6 @@ async function syncDocs() {
 }
 
 syncDocs().catch((err) => {
-  console.log('🔍 Environment check:');
-console.log('NOTION_TOKEN exists:', !!process.env.NOTION_TOKEN);
-console.log('NOTION_TOKEN format:', process.env.NOTION_TOKEN?.substring(0, 10) + '...');
-console.log('NOTION_PARENT_PAGE_ID:', process.env.NOTION_PARENT_PAGE_ID);
-console.log('NOTION_PARENT_PAGE_ID length:', process.env.NOTION_PARENT_PAGE_ID?.length);
   console.error(err);
   process.exit(1);
 });
