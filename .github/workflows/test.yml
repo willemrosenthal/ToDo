@@ -8,8 +8,8 @@ jobs:
     steps:
       - name: Check Environment Variables
         env:
-          TEST_GITHUB_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          TEST_SECRET: ${{ secrets.NOTION_PARENT_PAGE_ID }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PARENT_PAGE_ID: ${{ secrets.NOTION_PARENT_PAGE_ID }}
         run: |
           echo ${#NOTION_TOKEN}
           echo ${#NOTION_PARENT_PAGE_ID}
