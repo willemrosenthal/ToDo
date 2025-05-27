@@ -4,9 +4,15 @@ const path = require('path');
 const glob = require('glob');
 const matter = require('gray-matter');
 
+const notionToken = process.env.NOTION_TOKEN;
+const notionParentPageId = process.env.NOTION_PARENT_PAGE_ID;
+
+console.log(notionToken);
+console.log(notionParentPageId);
+
 // Init Notion client
-const notion = new Client({ auth: process.env.NOTION_TOKEN });
-const rootPageId = process.env.NOTION_PARENT_PAGE_ID;
+const notion = new Client({ auth: notionToken });
+const rootPageId = notionParentPageId;
 
 // Converts markdown to Notion blocks (very basic)
 function mdToBlocks(md) {
