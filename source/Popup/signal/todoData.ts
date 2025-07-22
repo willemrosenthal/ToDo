@@ -18,7 +18,7 @@ const convertFromOldFormat = async () => {
     let index = 0;
     const newTabs: TabType[] = [];
     for (const tabId of keysInTabs) {
-      const tab = parsed.tabs[tabId];
+      const tab = parsed.tabs[keysInTabs[tabId]];
       console.log('tab:', tab);
       const newConvertedTab: TabType = {
         id: uuidv4(),
