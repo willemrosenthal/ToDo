@@ -13,9 +13,10 @@ const convertFromOldFormat = async () => {
 
   if (res) {
     const parsed: StoredData = JSON.parse(res);
-    console.log('old format content:', parsed);
+    console.log('👵 old format content:', parsed);
     const keysInTabs = Object.keys(parsed.tabs);
     let index = 0;
+    const newTabs: TabType[] = [];
     for (const tabId of keysInTabs) {
       const tab = parsed.tabs[tabId];
       console.log('tab:', tab);
@@ -29,9 +30,12 @@ const convertFromOldFormat = async () => {
       const newTabData = tab.content;
       await newTab(newConvertedTab);
       await saveTabData(newConvertedTab.id, newTabData);
+      newTabs.push(newConvertedTab);
       index++;
     }
-    localStorage.removeItem(undefined);
+    // localStorage.removeItem(undefined);
+    tabList.value = newTabs;
+    currentTab.value = newTabs[0].id;
     return true;
   }
   return false;
@@ -57,23 +61,25 @@ export const currentTab = signal<string>(initialTab.id);
 export const loadingTabData = signal<boolean>(true);
 
 const getInitialData = async () => {
-  const gotTabs = getTabs().then((fetchedTabs) => {
+  let tabsFound = false;
+  getTabs().then((fetchedTabs) => {
     console.log('🐶 fetchedTabs', fetchedTabs);
     if (fetchedTabs.length > 0) {
       tabList.value = fetchedTabs;
       currentTab.value = fetchedTabs[0].id;
-      return true;
+      tabsFound = true;
+    } else {
+      convertFromOldFormat();
     }
-    return false;
   });
-  if (!gotTabs) {
-    const converted = await convertFromOldFormat();
-    if (!converted) {
-      tabList.value = [initialTab];
-      newTab(initialTab);
-      currentTab.value = initialTab.id;
-    }
-  }
+  // if (!tabsFound) {
+  //   const converted = await convertFromOldFormat();
+  //   if (!converted) {
+  //     tabList.value = [initialTab];
+  //     newTab(initialTab);
+  //     currentTab.value = initialTab.id;
+  //   }
+  // }
 };
 
 // get tabs from storage.
