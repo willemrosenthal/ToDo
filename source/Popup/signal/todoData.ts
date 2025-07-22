@@ -1,196 +1,114 @@
 import { batch, effect, signal } from '@preact/signals-react';
 import { findLowestMissingId } from '../utils/utils';
 import { selectedPaletteName, Settings } from './settings';
-import { customPalette } from './settings'
+import { customPalette } from './settings';
 import { PaletteColors } from '../theme/theme';
+import { TabType } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { getTabs, newTab, saveTabData } from '../storage/storage';
+import { StoredData } from './todoData_old';
 
-// default data
-const initialTab: Tab = {
-  id: 0,
-  name: 'To Do',
-  content: 'test content',
-};
-const initialStore: StoredData = {
-  tabs: {
-    0: initialTab,
-  },
-  currentTabIndex: 0,
-  tabOrder: [0],
-  timeStamp: -1,
-};
-
-// types
-export type Tab = {
-  id: number;
-  name: string;
-  content: string;
-};
-
-export type TabData = {
-  [id: string]: Tab;
-};
-
-export type StoredData = {
-  tabs: TabData;
-  currentTabIndex: number;
-  tabOrder: number[];
-  timeStamp?: number;
-  settings?: Settings;
-};
-export type TabUpdateType = {
-  content?: string;
-  name?: string;
-};
-
-// signals
-export const storeData = signal<StoredData>(initialStore);
-export const currentTab = signal<Tab>(initialTab);
-export const dataLoaded = signal<boolean>(false);
-
-getFromLocal();
-
-// functions
-export const getCurrentTabId = () => {
-  return storeData.value.tabOrder[storeData.value.currentTabIndex];
-};
-export const getCurrentTab = (): Tab => {
-  const tabId = getCurrentTabId();
-  return storeData.value.tabs[tabId];
-};
-
-export const getCurrentTabContent = (): string => {
-  const tab = getCurrentTab();
-  return tab.content;
-};
-
-export const setCurrentTab = (index: number) => {
-  storeData.value = {
-    ...storeData.value,
-    currentTabIndex: index,
-  };
-};
-
-export const saveTab = (update: TabUpdateType) => {
-  if (!dataLoaded.value) {
-    console.log('dont save on load');
-    return;
-  }
-
-  console.log('SAVING TAB:', dataLoaded.value);
-
-  const id = getCurrentTabId();
-  const existingTab = storeData.value.tabs[id];
-  storeData.value = {
-    ...storeData.value,
-    timeStamp: Date.now(),
-    tabs: {
-      ...storeData.value.tabs,
-      [id]: {
-        ...(existingTab && existingTab),
-        ...(update.content && { content: update.content }),
-        ...(update.name && { name: update.name }),
-      },
-    },
-    settings: {
-      palette: customPalette.value as PaletteColors,
-      selectedPalette: selectedPaletteName.value
-    }
-  };
-};
-
-export function createTab(name = '', defaultContent = ' '): Tab {
-  const s = storeData.value;
-  const newTabId = findLowestMissingId(s.tabOrder);
-  const newTab: Tab = {
-    id: newTabId,
-    name: name || `new-tab-${newTabId + 1}`,
-    content: defaultContent,
-  };
-  batch(() => {
-    storeData.value = {
-      tabs: {
-        ...s.tabs,
-        [newTabId]: newTab,
-      },
-      currentTabIndex: s.tabOrder.length,
-      tabOrder: [...s.tabOrder, newTabId],
-    };
-    currentTab.value = newTab;
-  });
-  // requestAnimationFrame(() => {
-  //   currentTab.value = getCurrentTab();
-  //   console.log('current tab:', currentTab.value);
-  // });
-  return newTab;
-}
-
-export function deleteTab(index: number): void {
-  const s = storeData.value;
-
-  const tabs = {
-    ...s.tabs,
-  };
-  delete tabs[index];
-
-  if (s.currentTabIndex === index && index > 0) s.currentTabIndex -= 1;
-
-  storeData.value = {
-    tabs,
-    currentTabIndex: s.currentTabIndex,
-    tabOrder: s.tabOrder.filter((v) => v !== index),
-  };
-}
-
-// effects
-effect(() => {
-  console.log('storeData changed:', storeData.value);
-  currentTab.value = getCurrentTab();
-  // save in local storage
-  // ...
-  saveInLocal();
-});
-
-// SAVING
-const todoDataKey = undefined; //'@to-do-data-key';
-function saveInLocal() {
-  console.log('SAVING');
-  localStorage.setItem(todoDataKey, JSON.stringify(storeData.value));
-}
-
-export function getFromLocal() {
-  console.log('LOADING');
-  const res = localStorage.getItem(todoDataKey);
-  console.log('LOADED:', res);
-  // check date time:
+const convertFromOldFormat = async () => {
+  const res = localStorage.getItem(undefined);
 
   if (res) {
     const parsed: StoredData = JSON.parse(res);
-    const parsedTimestamp = parsed.timeStamp || 0;
-    const storedTiemstamp = storeData.value.timeStamp || -1;
-    const parsedSettings = parsed.settings;
-    if (parsedTimestamp > storedTiemstamp) {
-      batch(() => {
-        storeData.value = JSON.parse(res);
-        dataLoaded.value = true;
-        if (parsedSettings) {
-          if (parsedSettings.palette) {
-            customPalette.value = parsedSettings.palette;
-          }
-          if (parsedSettings.selectedPalette) {
-            selectedPaletteName.value = parsedSettings.selectedPalette;
-          }
-        }
-        // customPalette.value = parsedSettings as PaletteColors;
-        console.log('loaded values from local storage');
-      });
-    } else {
-      dataLoaded.value = true;
+    console.log('old format content:', parsed);
+    const keysInTabs = Object.keys(parsed.tabs);
+    let index = 0;
+    for (const tabId of keysInTabs) {
+      const tab = parsed.tabs[tabId];
+      console.log('tab:', tab);
+      const newConvertedTab: TabType = {
+        id: uuidv4(),
+        order: index,
+        title: tab.name,
+        createdAt: parsed.timeStamp.toString(),
+        updatedAt: parsed.timeStamp.toString(),
+      };
+      const newTabData = tab.content;
+      await newTab(newConvertedTab);
+      await saveTabData(newConvertedTab.id, newTabData);
+      index++;
     }
-    requestAnimationFrame(() => {
-      currentTab.value = getCurrentTab();
-      console.log('current tab:', currentTab.value);
-    });
-  } else {
-    dataLoaded.value = true;
+    localStorage.removeItem(undefined);
+    return true;
   }
+  return false;
+};
+
+// default data
+const initialTab: TabType = {
+  id: uuidv4(),
+  order: 0,
+  title: 'To Do',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+export type TabUpdateType = {
+  content?: string;
+  id?: string;
+};
+
+// signals
+export const tabList = signal<TabType[]>([]);
+export const currentTab = signal<string>(initialTab.id);
+export const loadingTabData = signal<boolean>(true);
+
+const getInitialData = async () => {
+  const gotTabs = getTabs().then((fetchedTabs) => {
+    console.log('🐶 fetchedTabs', fetchedTabs);
+    if (fetchedTabs.length > 0) {
+      tabList.value = fetchedTabs;
+      currentTab.value = fetchedTabs[0].id;
+      return true;
+    }
+    return false;
+  });
+  if (!gotTabs) {
+    const converted = await convertFromOldFormat();
+    if (!converted) {
+      tabList.value = [initialTab];
+      newTab(initialTab);
+      currentTab.value = initialTab.id;
+    }
+  }
+};
+
+// get tabs from storage.
+getInitialData();
+// getTabs().then((fetchedTabs) => {
+//   console.log('🐶 fetchedTabs', fetchedTabs);
+//   if (fetchedTabs.length > 0) {
+//     tabList.value = fetchedTabs;
+//     currentTab.value = fetchedTabs[0].id;
+//   } else {
+//     tabList.value = [initialTab];
+//     newTab(initialTab);
+//     currentTab.value = initialTab.id;
+//   }
+// });
+
+effect(() => {
+  if (currentTab.value) {
+    loadingTabData.value = true;
+  }
+});
+
+effect(() => {
+  console.log('✅ tabList', tabList.value);
+});
+
+// const changeTab = (tabId: string) => {
+//   currentTab.value = tabId;
+//   getTabData(tabId).then((tabData) => {
+//     data.value = tabData;
+//   });
+// };
+
+export function updateTabDataOnRefocus() {
+  loadingTabData.value = true;
+  currentTab.value = '';
+  getInitialData();
 }

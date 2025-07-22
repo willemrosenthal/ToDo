@@ -5,10 +5,11 @@ import 'react-quill/dist/quill.snow.css';
 
 // import '../../styles.scss';
 import './Editor.scss';
-import { currentTab, saveTab } from '../../signal/todoData';
+import { currentTab, loadingTabData } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';
 import { useTheme } from '@mui/material/styles';
 import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
+import { saveTabData, getTabData } from '../../storage/storage';
 
 const Editor = () => {
   const [onContextMenu] = useContextMenu();
@@ -27,15 +28,23 @@ const Editor = () => {
     };
   }, [theme]);
 
-  // alert(JSON.stringify(tabData));
-  const setVal = (newContent: string) => {
-    // setValue(newContent);
-    saveTab({ content: newContent });
+  const saveDataToDb = (newContent: string) => {
+    console.log('saveDataToDb', newContent);
+    saveTabData(currentTab.value, newContent);
   };
 
+  // load data for tab
   useSignalEffect(() => {
-    if (currentTab.value.content) {
-      setValue(currentTab.value.content);
+    const fetchAndSetTabData = async () => {
+      if (currentTab.value) {
+        const tabData = (await getTabData(currentTab.value)) || '';
+        console.log('tabData fetched', tabData);
+        setValue(tabData);
+        loadingTabData.value = false;
+      }
+    };
+    if (currentTab.value) {
+      fetchAndSetTabData();
     }
   });
 
@@ -378,15 +387,21 @@ const Editor = () => {
 
   return (
     <>
-      <ReactQuill
-        style={style}
-        ref={quillRef}
-        value={value}
-        onChange={setVal}
-        onKeyDown={handleKeyDown}
-        modules={modules}
-        formats={formats}
-      />
+      {loadingTabData.value ? (
+        <div className='loading-tab-data'></div>
+      ) : (
+        <>
+          <ReactQuill
+            style={style}
+            ref={quillRef}
+            value={value}
+            onChange={saveDataToDb}
+            onKeyDown={handleKeyDown}
+            modules={modules}
+            formats={formats}
+          />
+        </>
+      )}
     </>
   );
 };

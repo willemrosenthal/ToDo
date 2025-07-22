@@ -3,7 +3,7 @@ import { HexAlphaColorPicker, HexColorInput } from 'react-colorful';
 import { customPalette } from '../../signal/settings';
 import { PaletteColors } from '../../theme/theme';
 import { signal, useSignalEffect } from '@preact/signals-react';
-import { saveTab } from '../../signal/todoData';
+import { saveTab } from '../../signal/todoData_old';
 // import styles from './ColorPicker.module.css';
 import './ColorPicker.css';
 

@@ -18,8 +18,8 @@ import './styles.scss';
 import PopoutButton from './components/PopoutButton/PopoutButton';
 import { popoutSettings } from './settings/settings';
 import { isStandalone } from './signal/popout';
-import { getFromLocal } from './signal/todoData';
 import Settings from './components/Settings/Settings';
+import { updateTabDataOnRefocus } from './signal/todoData';
 
 const closeWhenFocusIsLost = false;
 
@@ -91,10 +91,11 @@ const Main: React.FC = () => {
       window.close();
     };
 
-    window.addEventListener('focus', getFromLocal);
+    // window.addEventListener('focus', getFromLocal); // updateTabDataOnRefocus
+    window.addEventListener('focus', updateTabDataOnRefocus);
     if (closeWhenFocusIsLost) window.addEventListener('blur', handleBlur);
     return () => {
-      window.removeEventListener('focus', getFromLocal);
+      window.removeEventListener('focus', updateTabDataOnRefocus);
       if (closeWhenFocusIsLost) window.removeEventListener('blur', handleBlur);
     };
   }, []);
