@@ -41,7 +41,9 @@ interface BackupData {
   user: Record<string, any>;
 }
 
-export const createBackup = async (): Promise<void> => {
+const backupKey = 'todo-backups';
+
+export const createBackup = async (download?: boolean): Promise<void> => {
   console.log('⬇️createBackup');
   try {
     const db = await openDB('toDoList', 1);
@@ -87,48 +89,90 @@ export const createBackup = async (): Promise<void> => {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `todo-backup-${timestamp}.json`;
 
-    // Use File System Access API to save the file
-    if ('showSaveFilePicker' in window) {
-      const handle = await window.showSaveFilePicker({
-        suggestedName: filename,
-        types: [
-          {
-            description: 'JSON Backup File',
-            accept: {
-              'application/json': ['.json'],
+    if (download) {
+      // Use File System Access API to save the file
+      if ('showSaveFilePicker' in window) {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [
+            {
+              description: 'JSON Backup File',
+              accept: {
+                'application/json': ['.json'],
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
 
-      const writable = await handle.createWritable();
-      console.log('writable', writable);
-      await writable.write(jsonString);
-      await writable.close();
+        const writable = await handle.createWritable();
+        console.log('writable', writable);
+        await writable.write(jsonString);
+        await writable.close();
 
-      console.log('✅ Backup created successfully:', filename);
-    } else {
-      // Fallback for browsers that don't support File System Access API
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+        console.log('✅ Backup created successfully:', filename);
+      } else {
+        // Fallback for browsers that don't support File System Access API
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-      console.log('✅ Backup created successfully (fallback):', filename);
+        console.log('✅ Backup created successfully (fallback):', filename);
+      }
     }
+    // save in local storage
+    const maxBackups = 8;
+    const getExistingBackups = localStorage.getItem(backupKey);
+    const parsedBackups = getExistingBackups ? JSON.parse(getExistingBackups) : [];
+    console.log('parsedBackups', parsedBackups);
+    parsedBackups.push(jsonString);
+    if (parsedBackups.length > maxBackups) {
+      parsedBackups.shift();
+    }
+    console.log('parsedBackups', parsedBackups);
+    localStorage.setItem(backupKey, JSON.stringify(parsedBackups));
   } catch (error) {
     console.error('❌ Error creating backup:', error);
     throw error;
   }
 };
 
+export const getBackups = async (): Promise<BackupData[]> => {
+  const getExistingBackups = localStorage.getItem(backupKey);
+  if (!getExistingBackups) return [];
+
+  const backupStrings = JSON.parse(getExistingBackups);
+  return backupStrings.map((backupString: string) => JSON.parse(backupString));
+};
+
+export const restoreMostRecentBackup = async () => {
+  const backups = await getBackups();
+  console.log('backups', backups);
+
+  if (backups.length === 0) {
+    console.log('No backups available');
+    return;
+  }
+
+  const mostRecentBackup = backups[backups.length - 1];
+  console.log('mostRecentBackup', mostRecentBackup);
+
+  // remove most recent backup from local storage
+  const backupStrings = JSON.parse(localStorage.getItem(backupKey) || '[]');
+  backupStrings.pop();
+  localStorage.setItem(backupKey, JSON.stringify(backupStrings));
+
+  await restoreFromBackup(mostRecentBackup);
+};
+
 // Optional: Function to restore from backup
 export const restoreFromBackup = async (backupData: BackupData): Promise<void> => {
+  console.log('restoreFromBackup', backupData);
   try {
     const db = await openDB('toDoList', 1);
 
@@ -141,16 +185,19 @@ export const restoreFromBackup = async (backupData: BackupData): Promise<void> =
 
     // Restore tabs
     for (const tab of backupData.tabs) {
+      console.log('tab', tab);
       await db.put(STORES.TABS, tab, tab.id);
     }
 
     // Restore tab data
     for (const [tabId, data] of Object.entries(backupData.tabData)) {
+      console.log('data', data);
       await db.put(STORES.TAB_DATA, data, tabId);
     }
 
     // Restore recently deleted
     for (const item of backupData.recentlyDeleted) {
+      console.log('item', item);
       await db.put(STORES.RECENTLY_DELETED, item, item.id);
     }
 

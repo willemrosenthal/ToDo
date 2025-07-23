@@ -8,33 +8,15 @@ import { createBackup, loadBackupFile, restoreFromBackup, restoreMostRecentBacku
 import { batch } from '@preact/signals-react';
 import { tabList, currentTab } from '../../signal/todoData';
 
-interface RecentlyDeletedSidebarProps {
-  setSelected: (recentlyDeleted: RecentlyDeleted) => void;
-  selected: RecentlyDeleted;
-}
-
-const RecentlyDeletedSidebar = ({ setSelected, selected }: RecentlyDeletedSidebarProps) => {
+const BackupBar = () => {
   const [recentlyDeletedList, setRecentlyDeletedList] = useState<RecentlyDeleted[]>([]);
-
-  useEffect(() => {
-    const fetchRecentlyDeleted = async () => {
-      const recentlyDeleted = await getRecentlyDeleted();
-      setRecentlyDeletedList(recentlyDeleted);
-    };
-    fetchRecentlyDeleted();
-  }, []);
-
-  const recentlyDeletedItems = recentlyDeletedList.map((item) => {
-    return <RecentlyDeletedSidebarItem key={item.id} item={item} setSelected={setSelected} />;
-  });
 
   const handleBack = () => {
     mode.value = 'main';
-    setSelected(null);
   };
 
   const handleBackup = () => {
-    createBackup();
+    createBackup(true);
   };
 
   const handleRestore = async () => {
@@ -63,32 +45,26 @@ const RecentlyDeletedSidebar = ({ setSelected, selected }: RecentlyDeletedSideba
   };
 
   return (
-    <div className='recently-deleted-sidebar'>
-      <button className='recently-deleted-sidebar-item recently-deleted-back-button' onClick={handleBack}>
-        <FontAwesomeIcon icon={faArrowLeft} /> back
+    <div className='backup-bar'>
+      <button
+        className='recently-deleted-sidebar-item recently-deleted-back-button'
+        onClick={handleBackup}
+        style={{ borderRight: '1px solid black' }}
+      >
+        download backup
       </button>
-      <div className='recently-deleted-list'>{recentlyDeletedItems}</div>
+      <button
+        className='recently-deleted-sidebar-item recently-deleted-back-button'
+        onClick={handleRestore}
+        style={{ borderRight: '1px solid black' }}
+      >
+        restore from cache
+      </button>
+      <button className='recently-deleted-sidebar-item recently-deleted-back-button' onClick={handleRestoreFromFile}>
+        restore from file
+      </button>
     </div>
   );
 };
 
-const RecentlyDeletedSidebarItem = ({
-  item,
-  setSelected,
-}: {
-  item: RecentlyDeleted;
-  setSelected: (recentlyDeleted: RecentlyDeleted) => void;
-}) => {
-  return (
-    <button
-      className='recently-deleted-sidebar-item'
-      onClick={() => {
-        setSelected(item);
-      }}
-    >
-      {item.tabName}
-    </button>
-  );
-};
-
-export default RecentlyDeletedSidebar;
+export default BackupBar;

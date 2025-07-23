@@ -22,6 +22,7 @@ import Settings from './components/Settings/Settings';
 import { updateTabDataOnRefocus } from './signal/todoData';
 import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedWindow';
 import { mode } from './signal/app';
+import { createBackup } from './storage/backup';
 
 const closeWhenFocusIsLost = false;
 
@@ -90,11 +91,15 @@ const Main: React.FC = () => {
   // close popup if it looses focus
   useEffect(() => {
     const handleBlur = () => {
-      window.close();
+      setTimeout(() => {
+        window.close();
+      }, 10);
     };
 
     // window.addEventListener('focus', getFromLocal); // updateTabDataOnRefocus
     window.addEventListener('focus', updateTabDataOnRefocus);
+    window.addEventListener('blur', () => createBackup());
+
     if (closeWhenFocusIsLost) window.addEventListener('blur', handleBlur);
     return () => {
       window.removeEventListener('focus', updateTabDataOnRefocus);
