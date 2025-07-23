@@ -30,7 +30,9 @@ const Editor = () => {
 
   const saveDataToDb = (newContent: string) => {
     console.log('saveDataToDb', newContent);
-    saveTabData(currentTab.value, newContent);
+    if (currentTab.value) {
+      saveTabData(currentTab.value, newContent);
+    }
   };
 
   // load data for tab
@@ -45,6 +47,9 @@ const Editor = () => {
     };
     if (currentTab.value) {
       fetchAndSetTabData();
+    } else {
+      setValue('');
+      loadingTabData.value = false;
     }
   });
 
@@ -388,7 +393,12 @@ const Editor = () => {
   return (
     <>
       {loadingTabData.value ? (
-        <div className='loading-tab-data'></div>
+        <div
+          className='loading-tab-data'
+          style={{
+            backgroundColor: theme.palette.background.default,
+          }}
+        ></div>
       ) : (
         <>
           <ReactQuill

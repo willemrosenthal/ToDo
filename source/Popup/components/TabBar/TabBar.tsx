@@ -1,8 +1,8 @@
 import React, { useMemo, useRef, useState } from 'react';
 import './TabBar.scss';
-import { useSignalEffect } from '@preact/signals-react';
+import { useSignalEffect, batch, signal } from '@preact/signals-react';
 import Tab from '../Tab/Tab';
-import { tabList } from '../../signal/todoData';
+import { currentTab, tabList } from '../../signal/todoData';
 import { useTheme } from '@mui/material/styles';
 import { isStandalone } from '../../signal/popout';
 import PopoutButton from '../PopoutButton/PopoutButton';
@@ -12,13 +12,14 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { TabType } from '../../types';
 import { getTabs, newTab } from '../../storage/storage';
 
+export const newTabId = signal<string>();
+
 const TabBar = () => {
   const tabBarRef = useRef<HTMLDivElement>(null);
 
   const theme = useTheme();
 
   const [tabs, setTabs] = useState<TabType[]>([]);
-  const [activeTab, setActiveTab] = useState<TabType>();
 
   // get tabs from storage.
   useSignalEffect(() => {
@@ -28,39 +29,22 @@ const TabBar = () => {
     }
   });
 
-  // const handleOnTabSequenceChange = useCallback(
-  //   ({oldIndex, newIndex}: {oldIndex: number; newIndex: number}) => {
-  //     console.log({oldIndex, newIndex});
-  //     setTabs((tabs) => helpers.simpleSwitch(tabs, oldIndex, newIndex));
-  //     setActiveTab(newIndex);
-  //   },
-  //   []
-  // );
-
-  // const handleOnTabChange = useCallback((i) => {
-  //   console.log('select tab', i);
-  //   setActiveTab(i);
-  //   setCurrentTab(i);
-  // }, []);
-
-  const handleOnTabChange = (tab: TabType) => {
-    console.log('select tab', tab.id);
-    setActiveTab(tab);
-    // setCurrentTab(id);
-  };
-
   const tabItems = useMemo(() => {
-    return tabs.map((tab) => {
-      console.log('📄 tab', tab);
-      return <Tab tab={tab} key={tab.id} chooseTab={handleOnTabChange} />;
+    const items = tabs.map((tab) => {
+      return <Tab tab={tab} key={tab.id} />;
     });
+    return items;
   }, [tabs]);
 
   const createNewTab = async () => {
     const newTabItem = await newTab();
     const tabs = await getTabs();
     setTabs(tabs);
-    setActiveTab(newTabItem);
+    newTabId.value = newTabItem.id;
+    batch(() => {
+      tabList.value = tabs;
+      currentTab.value = newTabItem.id;
+    });
     // setActiveTab(tabs.length);
     // setTabIsNewId(new.id);
     setTimeout(() => {

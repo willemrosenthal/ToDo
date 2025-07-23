@@ -53,19 +53,22 @@ export const getRecentlyDeleted = async () => {
 
 // Delete a tab
 export const deleteTab = async (tabId: string) => {
+  console.log('💖 TOTAL TABS', totalTabs);
   if (totalTabs) {
     const db = await dbPromise;
     // get tab to be deleted
     const tab = await db.get(STORES.TABS, tabId);
+    console.log('💖 got tab', tab);
     const tabData = await db.get(STORES.TAB_DATA, tabId);
-
+    console.log('💖 got tabData', tabData);
     // save recently deleted tab data
     await saveRecentlyDeleted(tab, tabData);
-
+    console.log('💖 saved recently deleted tab data');
     // delete tab
     await db.delete(STORES.TABS, tabId);
+    console.log('💖 deleted tab');
     await db.delete(STORES.TAB_DATA, tabId);
-
+    console.log('💖 deleted tab data');
     totalTabs--;
   }
 };
@@ -78,14 +81,18 @@ const saveRecentlyDeleted = async (tab: TabType, tabData: any) => {
     deletedAt: new Date().toISOString(),
     data: tabData,
   };
+  console.log('💖 saving recently deleted', recentlyDeleted);
 
   // get total entries in recently deleted
   const totalRecentlyDeleted = await db.count(STORES.RECENTLY_DELETED);
 
   if (totalRecentlyDeleted >= maxRecentlyDeleted) {
+    const allRecentlyDeleted = await db.getAll(STORES.RECENTLY_DELETED);
+    const oldestRecentlyDeleted = allRecentlyDeleted.sort((a, b) => new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime())[0];
     // delete oldest recently deleted
-    const oldestRecentlyDeleted = await db.get(STORES.RECENTLY_DELETED, 0);
+    console.log('💖 deleting oldest recently deleted', oldestRecentlyDeleted);
     await db.delete(STORES.RECENTLY_DELETED, oldestRecentlyDeleted.id);
+    console.log('💖 deleted oldest recently deleted');
   }
 
   // save recently deleted
@@ -95,6 +102,7 @@ const saveRecentlyDeleted = async (tab: TabType, tabData: any) => {
 export const getTabs = async (): Promise<TabType[]> => {
   const db = await dbPromise;
   const tabs = await db.getAll(STORES.TABS);
+  totalTabs = tabs.length;
   const orderedTabs = tabs.sort((a, b) => a.order - b.order);
   return orderedTabs;
 };

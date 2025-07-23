@@ -43,15 +43,28 @@
   box-shadow: inset 10px 10px 0px 200px rgba(0,0,0,0) !important;
 }
 
-input {
+.tab input {
   border: 1px solid rgba(83, 83, 83, 0.396);
-  padding: 0px 5px;
+  padding: 0px 4px 1px 4px;
   border-radius: 3px;
   margin-bottom: 0px;
   height: 20px;
   width: 90px;
   margin-top: 0px;
+  transform: translateX(-10px);
   // text-align: center;
+}
+
+.tab.editing {
+  width: 125px;
+}
+
+.tab.new-tab {
+  width: 100px;
+  input {
+    width: 90px;
+    transform: translateX(0px);
+  }
 }
 
 .tab-bottom {
@@ -62,4 +75,13 @@ input {
   bottom: -2px;
   left: -2px;
   z-index: 1000;
+}
+
+.tab-delete-button-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+  font-size: 19px;
+  transform: translateX(5px) translateY(-4px);
 }

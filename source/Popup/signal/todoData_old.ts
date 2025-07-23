@@ -83,14 +83,14 @@ export const saveTab = (update: TabUpdateType) => {
   storeData.value = {
     ...storeData.value,
     timeStamp: Date.now(),
-    tabs: {
-      ...storeData.value.tabs,
-      [id]: {
-        ...(existingTab && existingTab),
-        ...(update.content && { content: update.content }),
-        ...(update.name && { name: update.name }),
-      },
-    },
+    // tabs: {
+    //   ...storeData.value.tabs,
+    //   [id]: {
+    //     ...(existingTab && existingTab),
+    //     ...(update.content && { content: update.content }),
+    //     ...(update.name && { name: update.name }),
+    //   },
+    // },
     settings: {
       palette: customPalette.value as PaletteColors,
       selectedPalette: selectedPaletteName.value,

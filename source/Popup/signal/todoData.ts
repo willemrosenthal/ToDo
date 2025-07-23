@@ -5,42 +5,8 @@ import { customPalette } from './settings';
 import { PaletteColors } from '../theme/theme';
 import { TabType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { getTabs, newTab, saveTabData } from '../storage/storage';
-import { StoredData } from './todoData_old';
-
-const convertFromOldFormat = async () => {
-  const res = localStorage.getItem(undefined);
-
-  if (res) {
-    const parsed: StoredData = JSON.parse(res);
-    console.log('👵 old format content:', parsed);
-    const keysInTabs = Object.keys(parsed.tabs);
-    let index = 0;
-    const newTabs: TabType[] = [];
-    for (const tabId of keysInTabs) {
-      const tab = parsed.tabs[keysInTabs[tabId]];
-      console.log('tab:', tab);
-      const newConvertedTab: TabType = {
-        id: uuidv4(),
-        order: index,
-        title: tab.name,
-        createdAt: parsed.timeStamp.toString(),
-        updatedAt: parsed.timeStamp.toString(),
-      };
-      const newTabData = tab.content;
-      await newTab(newConvertedTab);
-      await saveTabData(newConvertedTab.id, newTabData);
-      newTabs.push(newConvertedTab);
-      index++;
-    }
-    localStorage.removeItem(undefined);
-    tabList.value = newTabs;
-    currentTab.value = newTabs[0].id;
-    return true;
-  }
-  return false;
-};
-
+import { deleteTab, getTabs, newTab, saveTabData, updateTab } from '../storage/storage';
+import { convertFromOldFormat } from './migrateData';
 // default data
 const initialTab: TabType = {
   id: uuidv4(),
@@ -61,40 +27,53 @@ export const currentTab = signal<string>(initialTab.id);
 export const loadingTabData = signal<boolean>(true);
 
 const getInitialData = async () => {
-  let tabsFound = false;
-  getTabs().then((fetchedTabs) => {
-    console.log('🐶 fetchedTabs', fetchedTabs);
-    if (fetchedTabs.length > 0) {
-      tabList.value = fetchedTabs;
-      currentTab.value = fetchedTabs[0].id;
-      tabsFound = true;
-    } else {
-      convertFromOldFormat();
+  const tabsFound = await getTabs();
+
+  console.log('🐶 fetchedTabs', tabsFound);
+  if (tabsFound.length > 0) {
+    batch(() => {
+      tabList.value = tabsFound;
+      currentTab.value = tabsFound[0].id;
+    });
+  } else {
+    convertFromOldFormat();
+  }
+};
+
+export const handleDeleteTab = async (tabToDelete: TabType) => {
+  const deleteId = tabToDelete.id;
+  const deleteOrderNumber = tabToDelete.order;
+  // get tab to switch to
+  const switchToTab = tabList[deleteOrderNumber - 1] || tabList[deleteOrderNumber + 1];
+
+  // delete the tab
+  await deleteTab(deleteId);
+
+  // update the order of the remaining tabs
+  for (const tabToOrder of tabList.value) {
+    console.log('💖 tabToOrder', tabToOrder);
+    if (tabToOrder.order > deleteOrderNumber) {
+      tabToOrder.order--;
+      console.log('💖 updating tab', tabToOrder);
+      await updateTab(tabToOrder);
+    }
+  }
+
+  batch(() => {
+    // remove tab to delete from tabList
+    tabList.value = tabList.value.filter((tab) => tab.id !== deleteId);
+    console.log('💖 updated tabList', tabList.value);
+
+    // if there are tabs left, set the current tab to the previous tab
+    if (tabList.value.length > 0) {
+      console.log('💖 switching to tab', switchToTab);
+      currentTab.value = switchToTab.id;
     }
   });
-  // if (!tabsFound) {
-  //   const converted = await convertFromOldFormat();
-  //   if (!converted) {
-  //     tabList.value = [initialTab];
-  //     newTab(initialTab);
-  //     currentTab.value = initialTab.id;
-  //   }
-  // }
 };
 
 // get tabs from storage.
 getInitialData();
-// getTabs().then((fetchedTabs) => {
-//   console.log('🐶 fetchedTabs', fetchedTabs);
-//   if (fetchedTabs.length > 0) {
-//     tabList.value = fetchedTabs;
-//     currentTab.value = fetchedTabs[0].id;
-//   } else {
-//     tabList.value = [initialTab];
-//     newTab(initialTab);
-//     currentTab.value = initialTab.id;
-//   }
-// });
 
 effect(() => {
   if (currentTab.value) {
@@ -105,13 +84,6 @@ effect(() => {
 effect(() => {
   console.log('✅ tabList', tabList.value);
 });
-
-// const changeTab = (tabId: string) => {
-//   currentTab.value = tabId;
-//   getTabData(tabId).then((tabData) => {
-//     data.value = tabData;
-//   });
-// };
 
 export function updateTabDataOnRefocus() {
   loadingTabData.value = true;
