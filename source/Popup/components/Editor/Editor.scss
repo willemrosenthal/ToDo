@@ -91,3 +91,13 @@
   pointer-events: none;
   z-index: 10;
 }
+
+.loading-tab-data {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}

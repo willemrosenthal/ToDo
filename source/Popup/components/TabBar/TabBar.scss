@@ -3,6 +3,7 @@
   position: relative;
   z-index: 1;
   margin-bottom: -2px;
+  height: 37px;
 }
 
 .tab-bar-tabs {
@@ -48,4 +49,21 @@
   // overflow: hidden;
   // width: 100%;
   padding: 0 25px 0 25px !important;
+}
+
+.new-tab-button-container {
+  transform: translateY(5px);
+  padding: 0 14px 0 14px;
+  cursor: pointer;
+  background-color: transparent;
+  border-top: 2px dashed #000;
+  border-left: 2px dashed #000;
+  border-right: 2px dashed #000;
+  border-radius: 6px 6px 0 0;
+}
+
+.tab-name-input {
+  width: 100%;
+  // background-color: transparent;
+  // border: none;
 }

@@ -15,6 +15,8 @@
   font-family: Helvetica, Arial, sans-serif;
   font-size: 13px;
   position: relative;
+
+  transition: width 0.2s ease-in-out;
 }
 
 .tab-text-cutoff {
@@ -24,11 +26,23 @@
   width: 100%;
 }
 
+.emoji-tab {
+  font-size: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -7px !important;
+}
+
 .tab-label {
   margin-top: 0px;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis !important;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+
 }
 
 .tab.selected[role="button"] {
@@ -43,15 +57,29 @@
   box-shadow: inset 10px 10px 0px 200px rgba(0,0,0,0) !important;
 }
 
-input {
+.tab input {
   border: 1px solid rgba(83, 83, 83, 0.396);
-  padding: 0px 5px;
+  padding: 0px 4px 1px 4px;
   border-radius: 3px;
   margin-bottom: 0px;
   height: 20px;
   width: 90px;
   margin-top: 0px;
-  // text-align: center;
+  transition: all 0.2s ease-in-out;
+  margin-left: 0px;
+  position: absolute;
+  left: 5px;
+}
+
+.tab.editing {
+  width: 125px;
+}
+
+.tab.new-tab {
+  width: 100px;
+  input {
+    width: 85px;
+  }
 }
 
 .tab-bottom {
@@ -62,4 +90,13 @@ input {
   bottom: -2px;
   left: -2px;
   z-index: 1000;
+}
+
+.tab-delete-button-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+  font-size: 19px;
+  transform: translateX(5px) translateY(-4px);
 }

@@ -8,3 +8,49 @@
 //   color: $black;
 //   background-color: $greyWhite;
 // }
+
+:root {
+  margin: 0;
+  padding: 0;
+}
+
+.palette-category-container {
+  margin-bottom: 16px;
+}
+
+.color-picker-container {
+  margin-bottom: 12px;
+}
+
+input {
+  border: 1px solid #DADADA;
+  border-radius: 5px;
+  padding: 6px 14px;
+}
+
+.options-color-picker {
+  padding: 16px 16px;
+}
+
+h1 {
+  font-size: 25px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 16px;
+  text-align: center;
+  font-weight: 600;
+}
+
+p {
+  font-size: 14px;
+  text-align: center;
+}
+

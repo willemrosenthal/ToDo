@@ -5,10 +5,11 @@ import 'react-quill/dist/quill.snow.css';
 
 // import '../../styles.scss';
 import './Editor.scss';
-import { currentTab, saveTab } from '../../signal/todoData';
+import { currentTab, loadingTabData, tabList } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';
 import { useTheme } from '@mui/material/styles';
 import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
+import { saveTabData, getTabData } from '../../storage/storage';
 
 const Editor = () => {
   const [onContextMenu] = useContextMenu();
@@ -27,15 +28,28 @@ const Editor = () => {
     };
   }, [theme]);
 
-  // alert(JSON.stringify(tabData));
-  const setVal = (newContent: string) => {
-    // setValue(newContent);
-    saveTab({ content: newContent });
+  const saveDataToDb = (newContent: string) => {
+    console.log('saveDataToDb', newContent);
+    if (currentTab.value) {
+      saveTabData(currentTab.value, newContent);
+    }
   };
 
+  // load data for tab
   useSignalEffect(() => {
-    if (currentTab.value.content) {
-      setValue(currentTab.value.content);
+    const fetchAndSetTabData = async () => {
+      if (currentTab.value) {
+        const tabData = (await getTabData(currentTab.value)) || '';
+        console.log('🐶🐶🐶🐶 tabData fetched', tabData);
+        setValue(tabData);
+        loadingTabData.value = false;
+      }
+    };
+    if (currentTab.value) {
+      fetchAndSetTabData();
+    } else {
+      setValue('');
+      loadingTabData.value = false;
     }
   });
 
@@ -147,6 +161,7 @@ const Editor = () => {
   // handle editor functions
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      console.log('🌱 handleKeyDown');
       const quill = quillRef.current?.getEditor();
       if (!quill) return;
 
@@ -231,6 +246,7 @@ const Editor = () => {
   // }, []);
   useEffect(() => {
     const handleTextChange = (delta: any, oldDelta: any, source: any) => {
+      console.log('🌱 handleTextChange');
       const quill = quillRef.current?.getEditor();
       if (!quill) return;
 
@@ -299,6 +315,7 @@ const Editor = () => {
     };
 
     const quill = quillRef.current?.getEditor();
+    console.log('🌱 quill', quill);
     quill?.on('text-change', handleTextChange);
 
     return () => {
@@ -378,11 +395,28 @@ const Editor = () => {
 
   return (
     <>
+      {loadingTabData.value ||
+        !currentTab.value ||
+        (tabList.value.length === 0 && (
+          <div
+            className='loading-tab-data'
+            style={{
+              backgroundColor: theme.palette.background.default,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1000,
+            }}
+          ></div>
+        ))}
+
       <ReactQuill
         style={style}
         ref={quillRef}
         value={value}
-        onChange={setVal}
+        onChange={saveDataToDb}
         onKeyDown={handleKeyDown}
         modules={modules}
         formats={formats}

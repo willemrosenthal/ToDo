@@ -1,128 +1,165 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './Tab.scss';
-import { deleteTab, getCurrentTabId, saveTab } from '../../signal/todoData';
-import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
-import { Point } from '../../signal/contextMenu';
 import { useTheme } from '@mui/material/styles';
+import { TabType } from '../../types';
+import { currentTab, handleDeleteTab } from '../../signal/todoData';
+import { updateTab } from '../../storage/storage';
+import { useSignalEffect } from '@preact/signals-react';
+import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import IconButton from '../IconButton/IconButton';
+import { newTabId } from '../TabBar/TabBar';
 
-type TabProps = {
-  title: string;
-  chooseTab: (index: number) => void;
-  index?: number;
-  id?: number;
-  className?: string;
-  style?: { [key: string]: string };
-  newTab?: { tabIsNewId: number; setTabIsNewId: (num: number) => void };
+const isEmoji = (str: string) => {
+  // Match most emoji grapheme clusters
+  const emojiRegex = /^(\p{Emoji}(?:\p{Emoji_Modifier_Base}|\p{Emoji_Component}|\u200D|\uFE0F)*)$/u;
+  // Use Intl.Segmenter to count grapheme clusters
+  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  const segments = Array.from(segmenter.segment(str));
+  return segments.length === 1 && emojiRegex.test(str);
 };
 
-const Tab = ({ title, index, chooseTab, id, className = '', style = {}, newTab }: TabProps) => {
+const hasOneToThreeEmojisOnly = (str: string) => {
+  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  const graphemes = Array.from(segmenter.segment(str), (s) => s.segment);
+
+  // Emoji detection regex
+  const emojiRegex = /^(\p{Emoji}(?:\p{Emoji_Modifier_Base}|\p{Emoji_Component}|\u200D|\uFE0F)*)$/u;
+
+  // Filter for emoji graphemes only
+  const emojiParts = graphemes.filter((g) => emojiRegex.test(g));
+
+  // Return true if 1–3 graphemes and all of them are emojis
+  return emojiParts.length >= 1 && emojiParts.length <= 3 && emojiParts.length === graphemes.length;
+};
+
+type TabProps = {
+  tab: TabType;
+};
+
+let isDeleting = false;
+
+const Tab = ({ tab }: TabProps) => {
   const theme = useTheme();
-  const [onContextMenu] = useContextMenu();
-  const [editNameMode, setEditNameMode] = useState(false);
-  const [tabTitle, setTabTitle] = useState(title);
+  const [editMode, setEditMode] = useState(false);
+  const [title, setTitle] = useState(tab.title);
+  const [isSelected, setIsSelected] = useState(false);
   const renameRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (newTab && newTab.tabIsNewId === id) {
-      setEditNameMode(true);
-      newTab.setTabIsNewId(-1);
+  useSignalEffect(() => {
+    if (newTabId.value === tab.id) {
+      setEditMode(true);
     }
-  }, []);
-
-  const handleOnContextMenu = (e) => {
-    if (id === undefined || index === undefined) return;
-    e.preventDefault();
-    const options = [
-      {
-        label: 'rename',
-        callback: () => {
-          setEditNameMode(true);
-        },
-      },
-      {
-        label: 'delete',
-        callback: () => {
-          deleteTab(index);
-        },
-      },
-    ];
-    onContextMenu(e, options, id);
-  };
+  });
 
   const handleClick = () => {
-    chooseTab(index);
+    currentTab.value = tab.id;
   };
 
-  const isSelected = () => getCurrentTabId() === id;
-
-  const selectedClass = () => {
-    // console.log(`⭐️⭐️⭐️ ${getCurrentTabId()}`, id);
-    return getCurrentTabId() === id ? 'selected' : '';
-  };
+  useSignalEffect(() => {
+    setIsSelected(currentTab.value === tab.id);
+  });
 
   const handleTitleChange = (e) => {
-    setTabTitle(e.target.value);
+    setTitle(e.target.value);
+  };
+
+  const exitEditMode = () => {
+    setEditMode(false);
+    if (isNewTab()) newTabId.value = '';
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      setEditNameMode(false);
-      saveTab({ name: tabTitle });
+    if (e.key === 'Enter' && editMode) {
+      exitEditMode();
+      updateTab({ ...tab, title });
     }
   };
 
   // get focus
   useEffect(() => {
-    if (editNameMode) {
+    if (editMode) {
       renameRef.current?.focus();
     }
-  }, [editNameMode]);
+  }, [editMode]);
+
+  const isNewTab = () => newTabId.value === tab.id;
+
+  const isEmojiTab = useMemo(() => hasOneToThreeEmojisOnly(title), [title]);
 
   return (
     <div
       style={{
-        backgroundColor: selectedClass() ? theme.palette.background.default : theme.palette.background.inactive,
-        color: selectedClass() ? theme.palette.text.primary : theme.palette.text.secondary,
+        backgroundColor: currentTab.value === tab.id ? theme.palette.background.default : theme.palette.background.inactive,
+        color: isSelected ? theme.palette.text.primary : theme.palette.text.secondary,
         // borderColor: theme.palette.tertiary.dark,
 
         // @ts-ignore
-        borderLeft: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        borderLeft: isSelected ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
         // @ts-ignore
-        borderTop: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        borderTop: isSelected ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
         // @ts-ignore
-        borderRight: selectedClass() ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
+        borderRight: isSelected ? `2px solid ${theme.palette.border.main}` : '2px solid transparent',
         // @ts-ignore
-        borderBottom: selectedClass() ? '2px solid transparent' : `2px solid ${theme.palette.border.main}`,
-        ...(style && style),
+        borderBottom: isSelected ? '2px solid transparent' : `2px solid ${theme.palette.border.main}`,
       }}
       role='button'
-      className={`tab ${selectedClass()} ${className}`}
+      className={`tab ${isSelected ? 'selected' : ''} ${editMode ? 'editing' : ''} ${isNewTab() ? 'new-tab' : ''}`}
       onKeyDown={handleClick}
       onClick={handleClick}
-      tabIndex={id}
-      onContextMenu={handleOnContextMenu}
+      key={tab.id}
+      tabIndex={tab.order}
+      onDoubleClick={() => setEditMode(true)}
     >
-      <div className='tab-text-cutoff'>
-        {!editNameMode ? (
-          <div className='tab-label'>{tabTitle}</div>
-        ) : (
-          <>
-            <input
-              ref={renameRef}
-              type='text'
-              value={tabTitle}
-              onChange={handleTitleChange}
-              onKeyDown={handleKeyDown}
-              onBlur={() => {
-                setEditNameMode(false);
-                saveTab({ name: tabTitle });
-              }}
-            />
-          </>
-        )}
-        { /* @ts-ignore */ }
-        <div className='tab-bottom' style={{ backgroundColor: theme.palette.border.main, opacity: isSelected() ? '0' : '100' }}/>
-      </div>
+      {!editMode ? (
+        <div className={!isEmojiTab && 'tab-text-cutoff'}>
+          <div className={`tab-label ${isEmojiTab ? 'emoji-tab' : ''}`}>{title}</div>
+        </div>
+      ) : (
+        <div
+          className='tab-edit-container'
+          onBlur={() => {
+            if (title !== tab.title && !isDeleting) {
+              updateTab({ ...tab, title });
+              newTabId.value = '';
+            }
+            if (isNewTab()) {
+              exitEditMode();
+            } else {
+              setTimeout(() => {
+                exitEditMode();
+              }, 125);
+            }
+          }}
+        >
+          <input
+            ref={renameRef}
+            className='tab-name-input'
+            type='text'
+            value={title}
+            onChange={handleTitleChange}
+            onKeyDown={handleKeyDown}
+            // onBlur={() => {
+            //   setEditMode(false);
+            //   updateTab({ ...tab, title });
+            // }}
+          />
+          {!isNewTab() && (
+            <div className='tab-delete-button-container'>
+              <IconButton
+                color={theme.palette.secondary.main} //theme.palette.background.background
+                icon={faCircleXmark}
+                callback={() => {
+                  isDeleting = true;
+                  exitEditMode();
+                  handleDeleteTab(tab);
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+      {/* @ts-ignore */}
+      <div className='tab-bottom' style={{ backgroundColor: theme.palette.border.main, opacity: isSelected ? '0' : '100' }} />
     </div>
   );
 };

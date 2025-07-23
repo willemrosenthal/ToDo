@@ -1,6 +1,6 @@
 {
   "name": "web-extension-starter",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "description": "Web extension starter using react and typescript",
   "private": true,
   "repository": "https://github.com/abhijithvijayan/web-extension-starter.git",
@@ -35,11 +35,13 @@
     "@mui/material": "^5.16.7",
     "@preact/signals-react": "^2.2.0",
     "advanced-css-reset": "^1.2.2",
+    "idb": "^8.0.3",
     "react": "^17.0.2",
     "react-colorful": "^5.6.1",
     "react-dom": "^17.0.2",
     "react-quill": "^2.0.0",
     "styled-components": "^6.1.12",
+    "uuidv4": "^6.2.13",
     "webext-base-css": "^1.4.4",
     "webextension-polyfill-ts": "^0.26.0"
   },

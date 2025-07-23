@@ -18,8 +18,12 @@ import './styles.scss';
 import PopoutButton from './components/PopoutButton/PopoutButton';
 import { popoutSettings } from './settings/settings';
 import { isStandalone } from './signal/popout';
-import { getFromLocal } from './signal/todoData';
 import Settings from './components/Settings/Settings';
+import { updateTabDataOnRefocus } from './signal/todoData';
+import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedWindow';
+import { mode } from './signal/app';
+import { createBackup } from './storage/backup';
+import { waitForDbAccessEnd } from './storage/storage';
 
 const closeWhenFocusIsLost = false;
 
@@ -87,14 +91,20 @@ const Main: React.FC = () => {
 
   // close popup if it looses focus
   useEffect(() => {
-    const handleBlur = () => {
-      window.close();
+    const handleBlur = async () => {
+      await waitForDbAccessEnd();
+      setTimeout(() => {
+        window.close();
+      }, 10);
     };
 
-    window.addEventListener('focus', getFromLocal);
+    // window.addEventListener('focus', getFromLocal); // updateTabDataOnRefocus
+    window.addEventListener('focus', updateTabDataOnRefocus);
+    window.addEventListener('blur', () => createBackup());
+
     if (closeWhenFocusIsLost) window.addEventListener('blur', handleBlur);
     return () => {
-      window.removeEventListener('focus', getFromLocal);
+      window.removeEventListener('focus', updateTabDataOnRefocus);
       if (closeWhenFocusIsLost) window.removeEventListener('blur', handleBlur);
     };
   }, []);
@@ -105,9 +115,14 @@ const Main: React.FC = () => {
       <StyledMainContainer className={'main-container ' + (isStandalone.value ? 'standalone' : '')}>
         {/* <div className='main-container' style={style}> */}
         {/* {showContextMenu.value && <ContextMenu />} */}
-        <ContextMenu />
-        <TabBar />
-        <Editor />
+        {mode.value === 'main' && (
+          <>
+            <ContextMenu />
+            <TabBar />
+            <Editor />
+          </>
+        )}
+        {mode.value === 'recently-deleted' && <RecentlyDeletedWindow />}
         {/* </div> */}
       </StyledMainContainer>
     </div>

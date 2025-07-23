@@ -6,17 +6,19 @@ import './IconButton.scss';
 import { useTheme } from '@mui/material/styles';
 
 type IconButtonProps = {
-  icon: IconDefinition,
-  callback: Function, 
-}
+  icon: IconDefinition;
+  callback: Function;
+  color?: string;
+  style?: React.CSSProperties;
+};
 
-const IconButton = ({icon, callback}: IconButtonProps) => {
+const IconButton = ({ icon, callback, color, style }: IconButtonProps) => {
   const theme = useTheme();
 
   return (
-    <div className='icon-button'>
-      <button onClick={()=>callback()}>
-        <FontAwesomeIcon icon={icon} style={{ color: theme.palette.background.inactive }} />
+    <div className='icon-button' style={style}>
+      <button onClick={() => callback()}>
+        <FontAwesomeIcon icon={icon} style={{ color: color || theme.palette.background.inactive }} />
       </button>
     </div>
   );

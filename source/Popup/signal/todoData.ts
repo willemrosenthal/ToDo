@@ -1,196 +1,107 @@
 import { batch, effect, signal } from '@preact/signals-react';
 import { findLowestMissingId } from '../utils/utils';
-import { selectedPaletteName, Settings } from './settings';
-import { customPalette } from './settings'
+import { PaletteName, selectedPaletteName, Settings } from './settings';
+import { customPalette } from './settings';
 import { PaletteColors } from '../theme/theme';
-
+import { TabType } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { deleteTab, getTabs, loadSettings, newTab, saveTabData, updateTab } from '../storage/storage';
+import { convertFromOldFormat } from './migrateData';
 // default data
-const initialTab: Tab = {
-  id: 0,
-  name: 'To Do',
-  content: 'test content',
-};
-const initialStore: StoredData = {
-  tabs: {
-    0: initialTab,
-  },
-  currentTabIndex: 0,
-  tabOrder: [0],
-  timeStamp: -1,
+const initialTab: TabType = {
+  id: uuidv4(),
+  order: 0,
+  title: 'To Do',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
-// types
-export type Tab = {
-  id: number;
-  name: string;
-  content: string;
-};
-
-export type TabData = {
-  [id: string]: Tab;
-};
-
-export type StoredData = {
-  tabs: TabData;
-  currentTabIndex: number;
-  tabOrder: number[];
-  timeStamp?: number;
-  settings?: Settings;
-};
 export type TabUpdateType = {
   content?: string;
-  name?: string;
+  id?: string;
 };
 
 // signals
-export const storeData = signal<StoredData>(initialStore);
-export const currentTab = signal<Tab>(initialTab);
-export const dataLoaded = signal<boolean>(false);
+export const tabList = signal<TabType[]>([]);
+export const currentTab = signal<string>();
+export const loadingTabData = signal<boolean>(true);
+export const settings = signal<Settings>();
 
-getFromLocal();
+const getInitialData = async () => {
+  const tabsFound = await getTabs();
+  const settings: Settings = await loadSettings();
 
-// functions
-export const getCurrentTabId = () => {
-  return storeData.value.tabOrder[storeData.value.currentTabIndex];
-};
-export const getCurrentTab = (): Tab => {
-  const tabId = getCurrentTabId();
-  return storeData.value.tabs[tabId];
-};
+  console.log('🐶 fetchedTabs', tabsFound);
+  if (tabsFound.length > 0) {
+    batch(() => {
+      tabList.value = tabsFound;
+      currentTab.value = tabsFound[0].id;
 
-export const getCurrentTabContent = (): string => {
-  const tab = getCurrentTab();
-  return tab.content;
-};
-
-export const setCurrentTab = (index: number) => {
-  storeData.value = {
-    ...storeData.value,
-    currentTabIndex: index,
-  };
-};
-
-export const saveTab = (update: TabUpdateType) => {
-  if (!dataLoaded.value) {
-    console.log('dont save on load');
-    return;
-  }
-
-  console.log('SAVING TAB:', dataLoaded.value);
-
-  const id = getCurrentTabId();
-  const existingTab = storeData.value.tabs[id];
-  storeData.value = {
-    ...storeData.value,
-    timeStamp: Date.now(),
-    tabs: {
-      ...storeData.value.tabs,
-      [id]: {
-        ...(existingTab && existingTab),
-        ...(update.content && { content: update.content }),
-        ...(update.name && { name: update.name }),
-      },
-    },
-    settings: {
-      palette: customPalette.value as PaletteColors,
-      selectedPalette: selectedPaletteName.value
-    }
-  };
-};
-
-export function createTab(name = '', defaultContent = ' '): Tab {
-  const s = storeData.value;
-  const newTabId = findLowestMissingId(s.tabOrder);
-  const newTab: Tab = {
-    id: newTabId,
-    name: name || `new-tab-${newTabId + 1}`,
-    content: defaultContent,
-  };
-  batch(() => {
-    storeData.value = {
-      tabs: {
-        ...s.tabs,
-        [newTabId]: newTab,
-      },
-      currentTabIndex: s.tabOrder.length,
-      tabOrder: [...s.tabOrder, newTabId],
-    };
-    currentTab.value = newTab;
-  });
-  // requestAnimationFrame(() => {
-  //   currentTab.value = getCurrentTab();
-  //   console.log('current tab:', currentTab.value);
-  // });
-  return newTab;
-}
-
-export function deleteTab(index: number): void {
-  const s = storeData.value;
-
-  const tabs = {
-    ...s.tabs,
-  };
-  delete tabs[index];
-
-  if (s.currentTabIndex === index && index > 0) s.currentTabIndex -= 1;
-
-  storeData.value = {
-    tabs,
-    currentTabIndex: s.currentTabIndex,
-    tabOrder: s.tabOrder.filter((v) => v !== index),
-  };
-}
-
-// effects
-effect(() => {
-  console.log('storeData changed:', storeData.value);
-  currentTab.value = getCurrentTab();
-  // save in local storage
-  // ...
-  saveInLocal();
-});
-
-// SAVING
-const todoDataKey = undefined; //'@to-do-data-key';
-function saveInLocal() {
-  console.log('SAVING');
-  localStorage.setItem(todoDataKey, JSON.stringify(storeData.value));
-}
-
-export function getFromLocal() {
-  console.log('LOADING');
-  const res = localStorage.getItem(todoDataKey);
-  console.log('LOADED:', res);
-  // check date time:
-
-  if (res) {
-    const parsed: StoredData = JSON.parse(res);
-    const parsedTimestamp = parsed.timeStamp || 0;
-    const storedTiemstamp = storeData.value.timeStamp || -1;
-    const parsedSettings = parsed.settings;
-    if (parsedTimestamp > storedTiemstamp) {
-      batch(() => {
-        storeData.value = JSON.parse(res);
-        dataLoaded.value = true;
-        if (parsedSettings) {
-          if (parsedSettings.palette) {
-            customPalette.value = parsedSettings.palette;
-          }
-          if (parsedSettings.selectedPalette) {
-            selectedPaletteName.value = parsedSettings.selectedPalette;
-          }
-        }
-        // customPalette.value = parsedSettings as PaletteColors;
-        console.log('loaded values from local storage');
-      });
-    } else {
-      dataLoaded.value = true;
-    }
-    requestAnimationFrame(() => {
-      currentTab.value = getCurrentTab();
-      console.log('current tab:', currentTab.value);
+      // set the settings
+      if (settings) {
+        if (settings.selectedPalette) selectedPaletteName.value = settings.selectedPalette;
+        if (settings.palette) customPalette.value = settings.palette;
+      }
     });
   } else {
-    dataLoaded.value = true;
+    convertFromOldFormat();
   }
+};
+
+const findClosestTab = (tab: TabType) => {
+  const order = tab.order;
+  let neighbor = tabList.value.find((t) => t.order === order - 1);
+  if (neighbor) return neighbor;
+  return tabList.value.find((t) => t.order === order + 1);
+};
+
+export const handleDeleteTab = async (tabToDelete: TabType) => {
+  const deleteId = tabToDelete.id;
+  const deleteOrderNumber = tabToDelete.order;
+  // get tab to switch to
+  const switchToTab = findClosestTab(tabToDelete);
+
+  // delete the tab
+  await deleteTab(deleteId);
+
+  // update the order of the remaining tabs
+  for (const tabToOrder of tabList.value) {
+    console.log('💖 tabToOrder', tabToOrder);
+    if (tabToOrder.order > deleteOrderNumber) {
+      tabToOrder.order--;
+      console.log('💖 updating tab', tabToOrder);
+      await updateTab(tabToOrder);
+    }
+  }
+
+  batch(() => {
+    // remove tab to delete from tabList
+    tabList.value = tabList.value.filter((tab) => tab.id !== deleteId);
+    console.log('💖 updated tabList', tabList.value);
+
+    // if there are tabs left, set the current tab to the previous tab
+    if (tabList.value.length > 0) {
+      console.log('💖 switching to tab', switchToTab);
+      currentTab.value = switchToTab.id;
+    }
+  });
+};
+
+// get tabs from storage.
+getInitialData();
+
+effect(() => {
+  if (currentTab.value) {
+    loadingTabData.value = true;
+  }
+});
+
+effect(() => {
+  console.log('✅ tabList', tabList.value);
+});
+
+export function updateTabDataOnRefocus() {
+  loadingTabData.value = true;
+  currentTab.value = '';
+  getInitialData();
 }

@@ -3,19 +3,21 @@ import { Drawer, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { customPalette, paletteDrawerOpen, selectedPaletteName, PaletteName } from '../../signal/settings';
-import { saveTab } from '../../signal/todoData';
+import { saveTab } from '../../signal/todoData_old';
 import StyledScrollBar from '../StyledWrapper/StyledScrollBar';
 import { signal } from '@preact/signals-react';
+import { saveSettings } from '../../storage/storage';
 
 export const cat = signal('');
 export const subCat = signal('');
+export const customPaletteMenuOpen = signal(false);
 
 const Settings = () => {
   const toggleDrawer = (newOpen: boolean) => () => {
     paletteDrawerOpen.value = newOpen;
   };
 
-  const [currentColor, setCurrent] = useState(customPalette.value.primary.main);
+  const [currentColor, setCurrent] = useState(null);
 
   // cat and subcat
   // const [cat, setCat] = useState('');
@@ -59,7 +61,7 @@ const Settings = () => {
     });
   }, []);
 
-  const getCategrories = () => {
+  const getCategories = () => {
     return Object.entries(paletteList).map(([key, value]) => (
       <>
         <b>{key}</b>
@@ -69,9 +71,21 @@ const Settings = () => {
     ));
   };
 
+  customPaletteMenuOpen.value = selectedPaletteName.value === 'custom';
+
   const handleThemeSelect = (event: SelectChangeEvent) => {
-    selectedPaletteName.value = event.target.value as PaletteName;
-    saveTab({});
+    const newPalette = event.target.value as PaletteName;
+    selectedPaletteName.value = newPalette;
+    if (newPalette !== 'custom') {
+      cat.value = '';
+      subCat.value = '';
+      customPaletteMenuOpen.value = false;
+    } else {
+      customPaletteMenuOpen.value = true;
+    }
+    saveSettings({
+      selectedPalette: newPalette,
+    });
   };
 
   return (
@@ -103,10 +117,10 @@ const Settings = () => {
               <br />
               <br />
             </>
-            {selectedPaletteName.value === 'custom' && getCategrories()}
+            {selectedPaletteName.value === 'custom' && getCategories()}
           </div>
           <div style={{ height: '100%' }}>
-            <ColorPicker currentColor={currentColor} setter={setCurrent} />
+            <ColorPicker currentColor={currentColor || '#FFFFFF'} setter={setCurrent} />
           </div>
         </div>
       </StyledScrollBar>
