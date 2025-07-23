@@ -42,7 +42,7 @@ const Tab = ({ tab }: TabProps) => {
 
   const exitEditMode = () => {
     setEditMode(false);
-    newTabId.value = '';
+    if (isNewTab()) newTabId.value = '';
   };
 
   const handleKeyDown = (e) => {
@@ -97,9 +97,13 @@ const Tab = ({ tab }: TabProps) => {
               updateTab({ ...tab, title });
               newTabId.value = '';
             }
-            setTimeout(() => {
+            if (isNewTab()) {
               exitEditMode();
-            }, 100);
+            } else {
+              setTimeout(() => {
+                exitEditMode();
+              }, 125);
+            }
           }}
         >
           <input
@@ -117,6 +121,7 @@ const Tab = ({ tab }: TabProps) => {
           {!isNewTab() && (
             <div className='tab-delete-button-container'>
               <IconButton
+                color={theme.palette.secondary.main} //theme.palette.background.background
                 icon={faCircleXmark}
                 callback={() => {
                   isDeleting = true;

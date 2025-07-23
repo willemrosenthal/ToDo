@@ -11,9 +11,7 @@ const initialTab: Tab = {
   content: 'test content',
 };
 const initialStore: StoredData = {
-  tabs: {
-    0: initialTab,
-  },
+  tabs: {},
   currentTabIndex: 0,
   tabOrder: [0],
   timeStamp: -1,

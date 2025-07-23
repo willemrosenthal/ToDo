@@ -7,10 +7,12 @@ import { useTheme } from '@mui/material/styles';
 import { isStandalone } from '../../signal/popout';
 import PopoutButton from '../PopoutButton/PopoutButton';
 import IconButton from '../IconButton/IconButton';
+
 import { paletteDrawerOpen } from '../../signal/settings';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { TabType } from '../../types';
 import { getTabs, newTab } from '../../storage/storage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const newTabId = signal<string>();
 
@@ -61,6 +63,8 @@ const TabBar = () => {
     borderLeft: `2px dashed ${theme.palette.border.main}`,
     // @ts-ignore
     borderRight: `2px dashed ${theme.palette.border.main}`,
+    // @ts-ignore
+    color: theme.palette.border.main,
   };
 
   const scrollToRight = () => {
@@ -84,7 +88,8 @@ const TabBar = () => {
         {!isStandalone.value && <PopoutButton />}
         {tabItems}
         <button className='new-tab-button-container' onClick={createNewTab} key={'new-tab-button'} style={newTabButtonStyle}>
-          +
+          <b>+</b>
+          {/* <FontAwesomeIcon icon={faPlus} /> */}
         </button>
       </div>
     </div>

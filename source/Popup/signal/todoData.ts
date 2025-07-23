@@ -23,7 +23,7 @@ export type TabUpdateType = {
 
 // signals
 export const tabList = signal<TabType[]>([]);
-export const currentTab = signal<string>(initialTab.id);
+export const currentTab = signal<string>();
 export const loadingTabData = signal<boolean>(true);
 
 const getInitialData = async () => {
@@ -40,11 +40,18 @@ const getInitialData = async () => {
   }
 };
 
+const findClosestTab = (tab: TabType) => {
+  const order = tab.order;
+  let neighbor = tabList.value.find((t) => t.order === order - 1);
+  if (neighbor) return neighbor;
+  return tabList.value.find((t) => t.order === order + 1);
+};
+
 export const handleDeleteTab = async (tabToDelete: TabType) => {
   const deleteId = tabToDelete.id;
   const deleteOrderNumber = tabToDelete.order;
   // get tab to switch to
-  const switchToTab = tabList[deleteOrderNumber - 1] || tabList[deleteOrderNumber + 1];
+  const switchToTab = findClosestTab(tabToDelete);
 
   // delete the tab
   await deleteTab(deleteId);

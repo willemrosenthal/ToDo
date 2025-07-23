@@ -70,7 +70,5 @@ export const convertFromOldFormat = async () => {
       tabList.value = newTabs;
       currentTab.value = newTabs[0].id;
     });
-    return true;
   }
-  return false;
 };

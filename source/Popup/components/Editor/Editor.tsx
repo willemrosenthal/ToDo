@@ -5,7 +5,7 @@ import 'react-quill/dist/quill.snow.css';
 
 // import '../../styles.scss';
 import './Editor.scss';
-import { currentTab, loadingTabData } from '../../signal/todoData';
+import { currentTab, loadingTabData, tabList } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';
 import { useTheme } from '@mui/material/styles';
 import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
@@ -392,7 +392,7 @@ const Editor = () => {
 
   return (
     <>
-      {loadingTabData.value ? (
+      {loadingTabData.value || !currentTab.value || tabList.value.length === 0 ? (
         <div
           className='loading-tab-data'
           style={{
