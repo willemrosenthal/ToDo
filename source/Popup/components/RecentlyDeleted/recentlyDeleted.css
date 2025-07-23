@@ -5,40 +5,58 @@
   width: 100%;
   height: 100%;
   z-index: 1000;
+  display: flex;
 }
 
 .recently-deleted-sidebar {
-  position: fixed;
+  /* position: fixed; */
   top: 0;
   left: 0;
-  width: 100px;
+  width: 130px;
+  font-size: 12px;
   height: 100%;
   border-right: 1px solid black;
 }
 
 .recently-deleted-sidebar-item {
   width: 100%;
-  height: 26px;
   border-bottom: 1px solid black;
+  padding: 8px;
 }
 
 .recently-deleted-viewer {
-  position: fixed;
-  top: 0;
-  left: 100px;
-  width: calc(100% - 100px);
+  width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .recently-deleted-viewer-header {
   width: 100%;
-  height: 120px;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  /* align-items: center; */
+  button {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  }
+}
+
+.recently-deleted-item-info {
+  font-size: 12px;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .recently-deleted-viewer-body {
   width: 100%;
-  height: calc(100% - 100px);
-  border: 1px solid black;
+  height: 100%;
+  border-top: 1px solid black;
   .content {
     padding-bottom: 20px;
   }

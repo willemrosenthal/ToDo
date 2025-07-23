@@ -75,6 +75,7 @@ const saveRecentlyDeleted = async (tab: TabType, tabData: any) => {
     id: tab.id,
     tabName: tab.title,
     deletedAt: new Date().toISOString(),
+    createdAt: tab.createdAt,
     data: tabData,
   };
 
@@ -90,6 +91,11 @@ const saveRecentlyDeleted = async (tab: TabType, tabData: any) => {
 
   // save recently deleted
   await db.put(STORES.RECENTLY_DELETED, recentlyDeleted, recentlyDeleted.id);
+};
+
+export const deleteRecentlyDeleted = async (recentlyDeletedId: string) => {
+  const db = await dbPromise;
+  await db.delete(STORES.RECENTLY_DELETED, recentlyDeletedId);
 };
 
 export const getTabs = async (): Promise<TabType[]> => {

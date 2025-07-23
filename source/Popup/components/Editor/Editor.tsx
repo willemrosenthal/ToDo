@@ -40,7 +40,7 @@ const Editor = () => {
     const fetchAndSetTabData = async () => {
       if (currentTab.value) {
         const tabData = (await getTabData(currentTab.value)) || '';
-        console.log('tabData fetched', tabData);
+        console.log('🐶🐶🐶🐶 tabData fetched', tabData);
         setValue(tabData);
         loadingTabData.value = false;
       }
@@ -161,6 +161,7 @@ const Editor = () => {
   // handle editor functions
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      console.log('🌱 handleKeyDown');
       const quill = quillRef.current?.getEditor();
       if (!quill) return;
 
@@ -245,6 +246,7 @@ const Editor = () => {
   // }, []);
   useEffect(() => {
     const handleTextChange = (delta: any, oldDelta: any, source: any) => {
+      console.log('🌱 handleTextChange');
       const quill = quillRef.current?.getEditor();
       if (!quill) return;
 
@@ -313,6 +315,7 @@ const Editor = () => {
     };
 
     const quill = quillRef.current?.getEditor();
+    console.log('🌱 quill', quill);
     quill?.on('text-change', handleTextChange);
 
     return () => {
@@ -392,26 +395,32 @@ const Editor = () => {
 
   return (
     <>
-      {loadingTabData.value || !currentTab.value || tabList.value.length === 0 ? (
-        <div
-          className='loading-tab-data'
-          style={{
-            backgroundColor: theme.palette.background.default,
-          }}
-        ></div>
-      ) : (
-        <>
-          <ReactQuill
-            style={style}
-            ref={quillRef}
-            value={value}
-            onChange={saveDataToDb}
-            onKeyDown={handleKeyDown}
-            modules={modules}
-            formats={formats}
-          />
-        </>
-      )}
+      {loadingTabData.value ||
+        !currentTab.value ||
+        (tabList.value.length === 0 && (
+          <div
+            className='loading-tab-data'
+            style={{
+              backgroundColor: theme.palette.background.default,
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1000,
+            }}
+          ></div>
+        ))}
+
+      <ReactQuill
+        style={style}
+        ref={quillRef}
+        value={value}
+        onChange={saveDataToDb}
+        onKeyDown={handleKeyDown}
+        modules={modules}
+        formats={formats}
+      />
     </>
   );
 };
