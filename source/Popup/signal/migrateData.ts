@@ -1,8 +1,8 @@
 import { batch } from '@preact/signals-react';
-import { newTab, saveTabData } from '../storage/storage';
+import { newTab, saveSettings, saveTabData } from '../storage/storage';
 import { PaletteColors } from '../theme/theme';
 import { TabType } from '../types';
-import { PaletteName } from './settings';
+import { customPalette, PaletteName, selectedPaletteName } from './settings';
 import { tabList, currentTab } from './todoData';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -62,6 +62,17 @@ export const convertFromOldFormat = async () => {
       newTabs.push(newConvertedTab);
       index++;
     }
+    // convert settings
+    const migratedSettings: Partial<Settings> = {};
+    if (parsed.settings.palette) {
+      migratedSettings.palette = parsed.settings.palette;
+    }
+    if (parsed.settings.selectedPalette) {
+      migratedSettings.selectedPalette = parsed.settings.selectedPalette;
+    }
+    if (Object.keys(migratedSettings).length > 0) {
+      await saveSettings(migratedSettings);
+    }
     // remove old format
     localStorage.removeItem(undefined);
 
@@ -69,6 +80,10 @@ export const convertFromOldFormat = async () => {
       // set new format
       tabList.value = newTabs;
       currentTab.value = newTabs[0].id;
+      if (parsed.settings) {
+        if (parsed.settings.selectedPalette) selectedPaletteName.value = parsed.settings.selectedPalette;
+        if (parsed.settings.palette) customPalette.value = parsed.settings.palette;
+      }
     });
   }
 };

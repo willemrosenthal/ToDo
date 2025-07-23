@@ -23,6 +23,7 @@ import { updateTabDataOnRefocus } from './signal/todoData';
 import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedWindow';
 import { mode } from './signal/app';
 import { createBackup } from './storage/backup';
+import { waitForDbAccessEnd } from './storage/storage';
 
 const closeWhenFocusIsLost = false;
 
@@ -90,7 +91,8 @@ const Main: React.FC = () => {
 
   // close popup if it looses focus
   useEffect(() => {
-    const handleBlur = () => {
+    const handleBlur = async () => {
+      await waitForDbAccessEnd();
       setTimeout(() => {
         window.close();
       }, 10);

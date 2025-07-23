@@ -3,11 +3,11 @@ import { HexAlphaColorPicker, HexColorInput } from 'react-colorful';
 import { customPalette } from '../../signal/settings';
 import { PaletteColors } from '../../theme/theme';
 import { signal, useSignalEffect } from '@preact/signals-react';
-import { saveTab } from '../../signal/todoData_old';
 // import styles from './ColorPicker.module.css';
 import './ColorPicker.css';
 
 import { cat, customPaletteMenuOpen, subCat } from '../Settings/Settings';
+import { saveSettings } from '../../storage/storage';
 
 type ColorPickerProps = {
   currentColor?: string;
@@ -74,7 +74,9 @@ const ColorPicker = ({ currentColor = '#FFFFFF', setter }: ColorPickerProps) => 
           const newPalette = JSON.parse(JSON.stringify(customPalette.value));
           newPalette[label][sublabel] = color;
           customPalette.value = newPalette as PaletteColors;
-          saveTab({});
+          saveSettings({
+            palette: newPalette,
+          });
         }
       }
       setIsDragging(false);
@@ -107,7 +109,9 @@ const ColorPicker = ({ currentColor = '#FFFFFF', setter }: ColorPickerProps) => 
                   const newPalette = JSON.parse(JSON.stringify(customPalette.value));
                   newPalette[label][sublabel] = newColor;
                   customPalette.value = newPalette as PaletteColors;
-                  saveTab({});
+                  saveSettings({
+                    palette: newPalette,
+                  });
                 }
               }}
             />

@@ -69,31 +69,29 @@ export const setCurrentTab = (index: number) => {
 };
 
 export const saveTab = (update: TabUpdateType) => {
-  if (!dataLoaded.value) {
-    console.log('dont save on load');
-    return;
-  }
-
-  console.log('SAVING TAB:', dataLoaded.value);
-
-  const id = getCurrentTabId();
-  const existingTab = storeData.value.tabs[id];
-  storeData.value = {
-    ...storeData.value,
-    timeStamp: Date.now(),
-    // tabs: {
-    //   ...storeData.value.tabs,
-    //   [id]: {
-    //     ...(existingTab && existingTab),
-    //     ...(update.content && { content: update.content }),
-    //     ...(update.name && { name: update.name }),
-    //   },
-    // },
-    settings: {
-      palette: customPalette.value as PaletteColors,
-      selectedPalette: selectedPaletteName.value,
-    },
-  };
+  // if (!dataLoaded.value) {
+  //   console.log('dont save on load');
+  //   return;
+  // }
+  // console.log('SAVING TAB:', dataLoaded.value);
+  // const id = getCurrentTabId();
+  // const existingTab = storeData.value.tabs[id];
+  // storeData.value = {
+  //   ...storeData.value,
+  //   timeStamp: Date.now(),
+  //   // tabs: {
+  //   //   ...storeData.value.tabs,
+  //   //   [id]: {
+  //   //     ...(existingTab && existingTab),
+  //   //     ...(update.content && { content: update.content }),
+  //   //     ...(update.name && { name: update.name }),
+  //   //   },
+  //   // },
+  //   settings: {
+  //     palette: customPalette.value as PaletteColors,
+  //     selectedPalette: selectedPaletteName.value,
+  //   },
+  // };
 };
 
 export function createTab(name = '', defaultContent = ' '): Tab {

@@ -1,11 +1,11 @@
 import { batch, effect, signal } from '@preact/signals-react';
 import { findLowestMissingId } from '../utils/utils';
-import { selectedPaletteName, Settings } from './settings';
+import { PaletteName, selectedPaletteName, Settings } from './settings';
 import { customPalette } from './settings';
 import { PaletteColors } from '../theme/theme';
 import { TabType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { deleteTab, getTabs, newTab, saveTabData, updateTab } from '../storage/storage';
+import { deleteTab, getTabs, loadSettings, newTab, saveTabData, updateTab } from '../storage/storage';
 import { convertFromOldFormat } from './migrateData';
 // default data
 const initialTab: TabType = {
@@ -25,15 +25,23 @@ export type TabUpdateType = {
 export const tabList = signal<TabType[]>([]);
 export const currentTab = signal<string>();
 export const loadingTabData = signal<boolean>(true);
+export const settings = signal<Settings>();
 
 const getInitialData = async () => {
   const tabsFound = await getTabs();
+  const settings: Settings = await loadSettings();
 
   console.log('🐶 fetchedTabs', tabsFound);
   if (tabsFound.length > 0) {
     batch(() => {
       tabList.value = tabsFound;
       currentTab.value = tabsFound[0].id;
+
+      // set the settings
+      if (settings) {
+        if (settings.selectedPalette) selectedPaletteName.value = settings.selectedPalette;
+        if (settings.palette) customPalette.value = settings.palette;
+      }
     });
   } else {
     convertFromOldFormat();

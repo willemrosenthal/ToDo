@@ -6,6 +6,7 @@ import { customPalette, paletteDrawerOpen, selectedPaletteName, PaletteName } fr
 import { saveTab } from '../../signal/todoData_old';
 import StyledScrollBar from '../StyledWrapper/StyledScrollBar';
 import { signal } from '@preact/signals-react';
+import { saveSettings } from '../../storage/storage';
 
 export const cat = signal('');
 export const subCat = signal('');
@@ -73,15 +74,18 @@ const Settings = () => {
   customPaletteMenuOpen.value = selectedPaletteName.value === 'custom';
 
   const handleThemeSelect = (event: SelectChangeEvent) => {
-    selectedPaletteName.value = event.target.value as PaletteName;
-    if (selectedPaletteName.value !== 'custom') {
+    const newPalette = event.target.value as PaletteName;
+    selectedPaletteName.value = newPalette;
+    if (newPalette !== 'custom') {
       cat.value = '';
       subCat.value = '';
       customPaletteMenuOpen.value = false;
     } else {
       customPaletteMenuOpen.value = true;
     }
-    saveTab({});
+    saveSettings({
+      selectedPalette: newPalette,
+    });
   };
 
   return (
