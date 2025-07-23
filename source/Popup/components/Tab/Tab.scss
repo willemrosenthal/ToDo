@@ -15,6 +15,8 @@
   font-family: Helvetica, Arial, sans-serif;
   font-size: 13px;
   position: relative;
+
+  transition: all 0.2s ease-in-out;
 }
 
 .tab-text-cutoff {
@@ -51,8 +53,10 @@
   height: 20px;
   width: 90px;
   margin-top: 0px;
-  transform: translateX(-10px);
-  // text-align: center;
+  transition: all 0.2s ease-in-out;
+  margin-left: 0px;
+  position: absolute;
+  left: 5px;
 }
 
 .tab.editing {
@@ -62,8 +66,7 @@
 .tab.new-tab {
   width: 100px;
   input {
-    width: 90px;
-    transform: translateX(0px);
+    width: 85px;
   }
 }
 

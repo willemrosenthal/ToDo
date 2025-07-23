@@ -23,7 +23,7 @@ export const newTab = async (tabToCreate?: Partial<TabType>) => {
   const newTab = {
     id: uuidv4(),
     order: totalTabs,
-    title: 'New Tab',
+    title: `Tab ${totalTabs + 1}`,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...tabToCreate,

@@ -9,17 +9,16 @@ import PopoutButton from '../PopoutButton/PopoutButton';
 import IconButton from '../IconButton/IconButton';
 
 import { paletteDrawerOpen } from '../../signal/settings';
-import { faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { TabType } from '../../types';
-import { getTabs, newTab } from '../../storage/storage';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import TabBarButton from './NewTabButton';
 
 export const newTabId = signal<string>();
 
 const TabBar = () => {
   const tabBarRef = useRef<HTMLDivElement>(null);
 
-  const theme = useTheme();
+  // const theme = useTheme();
 
   const [tabs, setTabs] = useState<TabType[]>([]);
 
@@ -38,44 +37,6 @@ const TabBar = () => {
     return items;
   }, [tabs]);
 
-  const createNewTab = async () => {
-    const newTabItem = await newTab();
-    const tabs = await getTabs();
-    setTabs(tabs);
-    newTabId.value = newTabItem.id;
-    batch(() => {
-      tabList.value = tabs;
-      currentTab.value = newTabItem.id;
-    });
-    // setActiveTab(tabs.length);
-    // setTabIsNewId(new.id);
-    setTimeout(() => {
-      scrollToRight();
-    }, 40);
-  };
-
-  const newTabButtonStyle = {
-    backgroundColor: 'trasparent',
-    // borderBottom: theme.palette.border.main,
-    // @ts-ignore
-    borderTop: `2px dashed ${theme.palette.border.main}`,
-    // @ts-ignore
-    borderLeft: `2px dashed ${theme.palette.border.main}`,
-    // @ts-ignore
-    borderRight: `2px dashed ${theme.palette.border.main}`,
-    // @ts-ignore
-    color: theme.palette.border.main,
-  };
-
-  const scrollToRight = () => {
-    if (tabBarRef.current) {
-      tabBarRef.current.scrollTo({
-        left: tabBarRef.current.scrollWidth,
-        behavior: 'smooth',
-      });
-    }
-  };
-
   return (
     <div className='tab-bar'>
       <div className='tab-bar-tabs' ref={tabBarRef}>
@@ -87,10 +48,7 @@ const TabBar = () => {
         />
         {!isStandalone.value && <PopoutButton />}
         {tabItems}
-        <button className='new-tab-button-container' onClick={createNewTab} key={'new-tab-button'} style={newTabButtonStyle}>
-          <b>+</b>
-          {/* <FontAwesomeIcon icon={faPlus} /> */}
-        </button>
+        <TabBarButton tabBarRef={tabBarRef} />
       </div>
     </div>
   );
