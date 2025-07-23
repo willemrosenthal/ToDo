@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { RecentlyDeleted, TabType } from '../../types';
 import { useTheme } from '@mui/material/styles';
-import { saveTabData, newTab, deleteRecentlyDeleted } from '../../storage/storage';
+import { saveTabData, newTab, deleteRecentlyDeleted, getTabs } from '../../storage/storage';
 import { CircularProgress } from '@mui/material';
 import { mode } from '../../signal/app';
 import { currentTab, tabList } from '../../signal/todoData';
@@ -37,8 +37,9 @@ const RecentlyDeletedViewer = ({ selected }: RecentlyDeletedViewerProps) => {
     console.log('restoredTab', restoredTab);
     await saveTabData(restoredTab.id, selected.data);
     await deleteRecentlyDeleted(selected.id);
+    const allTabs = await getTabs();
     batch(() => {
-      tabList.value.push(restoredTab);
+      tabList.value = allTabs;
       currentTab.value = restoredTab.id;
       mode.value = 'main';
     });

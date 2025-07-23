@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { getRecentlyDeleted } from '../../storage/storage';
+import { getRecentlyDeleted, getTabs } from '../../storage/storage';
 import { RecentlyDeleted } from '../../types';
 import { mode } from '../../signal/app';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { createBackup, loadBackupFile, restoreFromBackup } from '../../storage/backup';
+import { batch } from '@preact/signals-react';
+import { tabList, currentTab } from '../../signal/todoData';
 
 interface RecentlyDeletedSidebarProps {
   setSelected: (recentlyDeleted: RecentlyDeleted) => void;
@@ -30,12 +33,34 @@ const RecentlyDeletedSidebar = ({ setSelected, selected }: RecentlyDeletedSideba
     setSelected(null);
   };
 
+  const handleBackup = () => {
+    createBackup();
+  };
+
+  const handleRestore = async () => {
+    const backupData = await loadBackupFile();
+    console.log('backupData', backupData);
+    await restoreFromBackup(backupData);
+    const allTabs = await getTabs();
+    batch(() => {
+      tabList.value = allTabs;
+      currentTab.value = allTabs[0]?.id;
+    });
+    handleBack();
+  };
+
   return (
     <div className='recently-deleted-sidebar'>
       <button className='recently-deleted-sidebar-item recently-deleted-back-button' onClick={handleBack}>
         <FontAwesomeIcon icon={faArrowLeft} /> back
       </button>
       {recentlyDeletedItems}
+      <button className='recently-deleted-sidebar-item recently-deleted-back-button' onClick={handleBackup}>
+        backup all
+      </button>
+      <button className='recently-deleted-sidebar-item recently-deleted-back-button' onClick={handleRestore}>
+        restore backup
+      </button>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './Tab.scss';
 import { useTheme } from '@mui/material/styles';
 import { TabType } from '../../types';
@@ -8,6 +8,29 @@ import { useSignalEffect } from '@preact/signals-react';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import IconButton from '../IconButton/IconButton';
 import { newTabId } from '../TabBar/TabBar';
+
+const isEmoji = (str: string) => {
+  // Match most emoji grapheme clusters
+  const emojiRegex = /^(\p{Emoji}(?:\p{Emoji_Modifier_Base}|\p{Emoji_Component}|\u200D|\uFE0F)*)$/u;
+  // Use Intl.Segmenter to count grapheme clusters
+  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  const segments = Array.from(segmenter.segment(str));
+  return segments.length === 1 && emojiRegex.test(str);
+};
+
+const hasOneToThreeEmojisOnly = (str: string) => {
+  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  const graphemes = Array.from(segmenter.segment(str), (s) => s.segment);
+
+  // Emoji detection regex
+  const emojiRegex = /^(\p{Emoji}(?:\p{Emoji_Modifier_Base}|\p{Emoji_Component}|\u200D|\uFE0F)*)$/u;
+
+  // Filter for emoji graphemes only
+  const emojiParts = graphemes.filter((g) => emojiRegex.test(g));
+
+  // Return true if 1–3 graphemes and all of them are emojis
+  return emojiParts.length >= 1 && emojiParts.length <= 3 && emojiParts.length === graphemes.length;
+};
 
 type TabProps = {
   tab: TabType;
@@ -61,6 +84,8 @@ const Tab = ({ tab }: TabProps) => {
 
   const isNewTab = () => newTabId.value === tab.id;
 
+  const isEmojiTab = useMemo(() => hasOneToThreeEmojisOnly(title), [title]);
+
   return (
     <div
       style={{
@@ -86,8 +111,8 @@ const Tab = ({ tab }: TabProps) => {
       onDoubleClick={() => setEditMode(true)}
     >
       {!editMode ? (
-        <div className='tab-text-cutoff'>
-          <div className='tab-label'>{title}</div>
+        <div className={!isEmojiTab && 'tab-text-cutoff'}>
+          <div className={`tab-label ${isEmojiTab ? 'emoji-tab' : ''}`}>{title}</div>
         </div>
       ) : (
         <div

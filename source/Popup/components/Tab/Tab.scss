@@ -16,7 +16,7 @@
   font-size: 13px;
   position: relative;
 
-  transition: all 0.2s ease-in-out;
+  transition: width 0.2s ease-in-out;
 }
 
 .tab-text-cutoff {
@@ -26,11 +26,23 @@
   width: 100%;
 }
 
+.emoji-tab {
+  font-size: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -7px !important;
+}
+
 .tab-label {
   margin-top: 0px;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis !important;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+
 }
 
 .tab.selected[role="button"] {
