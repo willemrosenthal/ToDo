@@ -7,6 +7,7 @@ export interface TabType {
 }
 
 export interface RecentlyDeleted {
+  id: string; // uuid
   tabName: string; // name of deleted tab
   deletedAt: string; // utc timestamp
   data: any; // data of the tab

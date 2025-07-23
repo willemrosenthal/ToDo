@@ -11,7 +11,8 @@ import IconButton from '../IconButton/IconButton';
 import { paletteDrawerOpen } from '../../signal/settings';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { TabType } from '../../types';
-import TabBarButton from './NewTabButton';
+import TabBarButton from './SubComponents/NewTabButton';
+import RecentlyDeleted from './SubComponents/RecentlyDeleted';
 
 export const newTabId = signal<string>();
 
@@ -49,6 +50,7 @@ const TabBar = () => {
         {!isStandalone.value && <PopoutButton />}
         {tabItems}
         <TabBarButton tabBarRef={tabBarRef} />
+        <RecentlyDeleted />
       </div>
     </div>
   );

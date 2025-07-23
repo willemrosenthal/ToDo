@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 import { STORES } from './constants';
 import { v4 as uuidv4 } from 'uuid';
-import { TabType } from '../types';
+import { RecentlyDeleted, TabType } from '../types';
 
 // Open (or create) the database
 const dbPromise = openDB('toDoList', 1, {
@@ -14,7 +14,7 @@ const dbPromise = openDB('toDoList', 1, {
   },
 });
 
-const maxRecentlyDeleted = 5;
+const maxRecentlyDeleted = 8;
 let totalTabs = 0;
 
 // Create a new tab
@@ -46,42 +46,37 @@ export const updateTab = async (updates: Partial<TabType>) => {
   await db.put(STORES.TABS, updatedTab, updates.id);
 };
 
-export const getRecentlyDeleted = async () => {
+export const getRecentlyDeleted = async (): Promise<RecentlyDeleted[]> => {
   const db = await dbPromise;
-  return db.getAll(STORES.RECENTLY_DELETED);
+  const recentlyDeleted = await db.getAll(STORES.RECENTLY_DELETED);
+  const sortedRecentlyDeleted = recentlyDeleted.sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
+  return sortedRecentlyDeleted;
 };
 
 // Delete a tab
 export const deleteTab = async (tabId: string) => {
-  console.log('💖 TOTAL TABS', totalTabs);
   if (totalTabs) {
     const db = await dbPromise;
     // get tab to be deleted
     const tab = await db.get(STORES.TABS, tabId);
-    console.log('💖 got tab', tab);
     const tabData = await db.get(STORES.TAB_DATA, tabId);
-    console.log('💖 got tabData', tabData);
     // save recently deleted tab data
     await saveRecentlyDeleted(tab, tabData);
-    console.log('💖 saved recently deleted tab data');
     // delete tab
     await db.delete(STORES.TABS, tabId);
-    console.log('💖 deleted tab');
     await db.delete(STORES.TAB_DATA, tabId);
-    console.log('💖 deleted tab data');
     totalTabs--;
   }
 };
 
 const saveRecentlyDeleted = async (tab: TabType, tabData: any) => {
   const db = await dbPromise;
-  const recentlyDeleted = {
+  const recentlyDeleted: RecentlyDeleted = {
     id: tab.id,
     tabName: tab.title,
     deletedAt: new Date().toISOString(),
     data: tabData,
   };
-  console.log('💖 saving recently deleted', recentlyDeleted);
 
   // get total entries in recently deleted
   const totalRecentlyDeleted = await db.count(STORES.RECENTLY_DELETED);
@@ -90,9 +85,7 @@ const saveRecentlyDeleted = async (tab: TabType, tabData: any) => {
     const allRecentlyDeleted = await db.getAll(STORES.RECENTLY_DELETED);
     const oldestRecentlyDeleted = allRecentlyDeleted.sort((a, b) => new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime())[0];
     // delete oldest recently deleted
-    console.log('💖 deleting oldest recently deleted', oldestRecentlyDeleted);
     await db.delete(STORES.RECENTLY_DELETED, oldestRecentlyDeleted.id);
-    console.log('💖 deleted oldest recently deleted');
   }
 
   // save recently deleted

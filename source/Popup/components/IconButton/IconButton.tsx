@@ -9,13 +9,14 @@ type IconButtonProps = {
   icon: IconDefinition;
   callback: Function;
   color?: string;
+  style?: React.CSSProperties;
 };
 
-const IconButton = ({ icon, callback, color }: IconButtonProps) => {
+const IconButton = ({ icon, callback, color, style }: IconButtonProps) => {
   const theme = useTheme();
 
   return (
-    <div className='icon-button'>
+    <div className='icon-button' style={style}>
       <button onClick={() => callback()}>
         <FontAwesomeIcon icon={icon} style={{ color: color || theme.palette.background.inactive }} />
       </button>

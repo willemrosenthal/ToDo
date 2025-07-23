@@ -1,0 +1,46 @@
+.recently-deleted {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+.recently-deleted-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100%;
+  border-right: 1px solid black;
+}
+
+.recently-deleted-sidebar-item {
+  width: 100%;
+  height: 26px;
+  border-bottom: 1px solid black;
+}
+
+.recently-deleted-viewer {
+  position: fixed;
+  top: 0;
+  left: 100px;
+  width: calc(100% - 100px);
+  height: 100%;
+}
+
+.recently-deleted-viewer-header {
+  width: 100%;
+  height: 120px;
+}
+
+.recently-deleted-viewer-body {
+  width: 100%;
+  height: calc(100% - 100px);
+  border: 1px solid black;
+  .content {
+    padding-bottom: 20px;
+  }
+}
+

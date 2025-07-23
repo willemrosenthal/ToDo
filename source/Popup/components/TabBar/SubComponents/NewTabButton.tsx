@@ -1,10 +1,10 @@
 import React from 'react';
-import './TabBar.scss';
+import '../TabBar.scss';
 import { batch } from '@preact/signals-react';
-import { currentTab, tabList } from '../../signal/todoData';
+import { currentTab, tabList } from '../../../signal/todoData';
 import { useTheme } from '@mui/material/styles';
-import { getTabs, newTab } from '../../storage/storage';
-import { newTabId } from './TabBar';
+import { getTabs, newTab } from '../../../storage/storage';
+import { newTabId } from '../TabBar';
 
 const TabBarButton = ({ tabBarRef }: { tabBarRef: React.MutableRefObject<HTMLDivElement> }) => {
   //React.MutableRefObject<HTMLDivElement>

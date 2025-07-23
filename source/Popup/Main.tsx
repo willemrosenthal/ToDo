@@ -20,6 +20,8 @@ import { popoutSettings } from './settings/settings';
 import { isStandalone } from './signal/popout';
 import Settings from './components/Settings/Settings';
 import { updateTabDataOnRefocus } from './signal/todoData';
+import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedWindow';
+import { mode } from './signal/app';
 
 const closeWhenFocusIsLost = false;
 
@@ -106,9 +108,14 @@ const Main: React.FC = () => {
       <StyledMainContainer className={'main-container ' + (isStandalone.value ? 'standalone' : '')}>
         {/* <div className='main-container' style={style}> */}
         {/* {showContextMenu.value && <ContextMenu />} */}
-        <ContextMenu />
-        <TabBar />
-        <Editor />
+        {mode.value === 'main' && (
+          <>
+            <ContextMenu />
+            <TabBar />
+            <Editor />
+          </>
+        )}
+        {mode.value === 'recently-deleted' && <RecentlyDeletedWindow />}
         {/* </div> */}
       </StyledMainContainer>
     </div>
