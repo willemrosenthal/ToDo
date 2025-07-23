@@ -33,7 +33,7 @@ const convertFromOldFormat = async () => {
       newTabs.push(newConvertedTab);
       index++;
     }
-    // localStorage.removeItem(undefined);
+    localStorage.removeItem(undefined);
     tabList.value = newTabs;
     currentTab.value = newTabs[0].id;
     return true;
