@@ -3,6 +3,8 @@ import { STORES } from './constants';
 import { TabType, RecentlyDeleted } from '../types';
 
 // Type declarations for File System Access API
+
+const maxBackups = 15;
 declare global {
   interface Window {
     showSaveFilePicker(options?: {
@@ -126,7 +128,6 @@ export const createBackup = async (download?: boolean): Promise<void> => {
       }
     }
     // save in local storage
-    const maxBackups = 8;
     const getExistingBackups = localStorage.getItem(backupKey);
     const parsedBackups = getExistingBackups ? JSON.parse(getExistingBackups) : [];
     console.log('parsedBackups', parsedBackups);
