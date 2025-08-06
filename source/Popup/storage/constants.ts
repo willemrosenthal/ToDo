@@ -3,5 +3,5 @@ export enum STORES {
   TABS = 'tabs',
   TAB_DATA = 'tabData',
   RECENTLY_DELETED = 'recentlyDeleted',
-  USER = 'user',
+  USER_DATA = 'user',
 }

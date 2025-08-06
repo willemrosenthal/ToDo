@@ -99,4 +99,12 @@
   z-index: 1000;
   font-size: 19px;
   transform: translateX(5px) translateY(-4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.tab-delete-button-container.visible {
+  opacity: 100%;
+  pointer-events: auto;
 }

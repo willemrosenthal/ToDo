@@ -1,9 +1,8 @@
-import { batch } from '@preact/signals-react';
-import { newTab, saveSettings, saveTabData } from '../storage/storage';
+import { newTab, saveSettings } from '../storage/storage';
 import { PaletteColors } from '../theme/theme';
 import { TabType } from '../types';
-import { customPalette, PaletteName, selectedPaletteName } from './settings';
-import { tabList, currentTab } from './todoData';
+import { PaletteName } from './settings';
+import { tabList, setLoadedData, TabToContentMap } from './todoData';
 import { v4 as uuidv4 } from 'uuid';
 
 type Settings = {
@@ -39,15 +38,14 @@ export const convertFromOldFormat = async () => {
 
   if (res) {
     const parsed: StoredData = JSON.parse(res);
-    console.log('👵 old format content:', parsed);
     const keysInTabs = Object.keys(parsed.tabs);
     let index = 0;
     const newTabs: TabType[] = [];
+    const contentMap: TabToContentMap = new Map();
 
     // convert to new format
     for (const tabId of keysInTabs) {
       const tab = parsed.tabs[keysInTabs[tabId]];
-      console.log('tab:', tab);
       const newConvertedTab: TabType = {
         id: uuidv4(),
         order: index,
@@ -57,9 +55,9 @@ export const convertFromOldFormat = async () => {
       };
       const newTabData = tab.content;
       // save new tab
-      await newTab(newConvertedTab);
-      await saveTabData(newConvertedTab.id, newTabData);
+      await newTab(newConvertedTab, newTabData);
       newTabs.push(newConvertedTab);
+      contentMap.set(newConvertedTab.id, newTabData);
       index++;
     }
     // convert settings
@@ -76,14 +74,11 @@ export const convertFromOldFormat = async () => {
     // remove old format
     localStorage.removeItem(undefined);
 
-    batch(() => {
-      // set new format
-      tabList.value = newTabs;
-      currentTab.value = newTabs[0].id;
-      if (parsed.settings) {
-        if (parsed.settings.selectedPalette) selectedPaletteName.value = parsed.settings.selectedPalette;
-        if (parsed.settings.palette) customPalette.value = parsed.settings.palette;
-      }
+    setLoadedData({
+      tabsFound: newTabs,
+      contentMap,
+      settings: parsed.settings,
+      userData: null,
     });
   }
 };

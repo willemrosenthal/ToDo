@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 import { STORES } from './constants';
 import { v4 as uuidv4 } from 'uuid';
-import { RecentlyDeleted, TabType } from '../types';
+import { UserData, RecentlyDeleted, TabContent, TabType } from '../types';
 import { signal } from '@preact/signals-react';
 import { Settings } from '../signal/settings';
 
@@ -50,34 +50,46 @@ const setAccessingDbResolved = () => {
 };
 
 // Open (or create) the database
+console.log('A');
 const dbPromise = openDB('toDoList', 1, {
   upgrade(db) {
     db.createObjectStore(STORES.SETTINGS);
     db.createObjectStore(STORES.TABS);
     db.createObjectStore(STORES.TAB_DATA);
     db.createObjectStore(STORES.RECENTLY_DELETED);
-    db.createObjectStore(STORES.USER);
+    db.createObjectStore(STORES.USER_DATA);
   },
 });
+console.log('B');
 
 const maxRecentlyDeleted = 8;
 let totalTabs = 0;
 
 // Create a new tab
-export const newTab = async (tabToCreate?: Partial<TabType>) => {
+export const newTab = async (tabToCreate?: Partial<TabType>, initialContent?: string) => {
   setAccessingDb();
   const db = await dbPromise;
+  // create the tab
   const tabToMake = {
     id: uuidv4(),
     order: totalTabs,
     title: `Tab ${totalTabs + 1}`,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    ...tabToCreate,
+    ...(tabToCreate || {}),
   };
   await db.put(STORES.TABS, tabToMake, tabToMake.id);
-  await db.put(STORES.TAB_DATA, {}, tabToMake.id);
+
+  // create the tab data
+  const newTabContent: TabContent = {
+    id: tabToMake.id,
+    content: initialContent || '',
+  };
+  await db.put(STORES.TAB_DATA, newTabContent, tabToMake.id);
+
+  // increment number of tabs
   totalTabs++;
+
   setAccessingDbResolved();
   return tabToMake;
 };
@@ -91,7 +103,6 @@ export const updateTab = async (updates: Partial<TabType>) => {
     ...updates,
     updatedAt: new Date().toISOString(),
   };
-  console.log('👍 updatedTab', updatedTab);
   await db.put(STORES.TABS, updatedTab, updates.id);
   setAccessingDbResolved();
 };
@@ -164,18 +175,54 @@ export const getTabs = async (): Promise<TabType[]> => {
   return orderedTabs;
 };
 
-export const getTabData = async (tabId: string) => {
+export const getAllTabsData = async (): Promise<TabContent[]> => {
   setAccessingDb();
   const db = await dbPromise;
+  const allTabsData = await db.getAll(STORES.TAB_DATA);
+  setAccessingDbResolved();
+  return allTabsData;
+};
+
+export const isTabDataFormat = (td): boolean => {
+  return 'id' in td && 'content' in td;
+};
+
+export const getTabData = async (tabId: string): Promise<string> => {
+  setAccessingDb();
+  const db = await dbPromise;
+  // could come in as a string (old version), or TabContent (new)
   const tabData = await db.get(STORES.TAB_DATA, tabId);
   setAccessingDbResolved();
+
+  // return the content of the tab (new version)
+  if (isTabDataFormat(tabData)) return tabData.content;
+  // return the string-only content (old version)
   return tabData;
 };
 
 export const saveTabData = async (tabId: string, data: string) => {
   setAccessingDb();
   const db = await dbPromise;
-  await db.put(STORES.TAB_DATA, data, tabId);
+  const tabContentDataToSave: TabContent = {
+    id: tabId,
+    content: data,
+  };
+  await db.put(STORES.TAB_DATA, tabContentDataToSave, tabId);
+  setAccessingDbResolved();
+};
+
+export const getUserData = async (): Promise<UserData | null> => {
+  setAccessingDb();
+  const db = await dbPromise;
+  const userData = await db.get(STORES.USER_DATA, 'userData');
+  setAccessingDbResolved();
+  return userData || null;
+};
+
+export const saveUserData = async (userData: Partial<UserData>) => {
+  setAccessingDb();
+  const db = await dbPromise;
+  await db.put(STORES.USER_DATA, userData, 'userData');
   setAccessingDbResolved();
 };
 

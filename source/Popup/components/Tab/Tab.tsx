@@ -2,21 +2,22 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './Tab.scss';
 import { useTheme } from '@mui/material/styles';
 import { TabType } from '../../types';
-import { currentTab, handleDeleteTab } from '../../signal/todoData';
+import { currentTab } from '../../signal/todoData';
 import { updateTab } from '../../storage/storage';
-import { useSignalEffect } from '@preact/signals-react';
+import { signal, useSignalEffect } from '@preact/signals-react';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import IconButton from '../IconButton/IconButton';
 import { newTabId } from '../TabBar/TabBar';
+import { handleDeleteTab } from '../../storage/dataManagement';
 
-const isEmoji = (str: string) => {
-  // Match most emoji grapheme clusters
-  const emojiRegex = /^(\p{Emoji}(?:\p{Emoji_Modifier_Base}|\p{Emoji_Component}|\u200D|\uFE0F)*)$/u;
-  // Use Intl.Segmenter to count grapheme clusters
-  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
-  const segments = Array.from(segmenter.segment(str));
-  return segments.length === 1 && emojiRegex.test(str);
-};
+// const isEmoji = (str: string) => {
+//   // Match most emoji grapheme clusters
+//   const emojiRegex = /^(\p{Emoji}(?:\p{Emoji_Modifier_Base}|\p{Emoji_Component}|\u200D|\uFE0F)*)$/u;
+//   // Use Intl.Segmenter to count grapheme clusters
+//   const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+//   const segments = Array.from(segmenter.segment(str));
+//   return segments.length === 1 && emojiRegex.test(str);
+// };
 
 const hasOneToThreeEmojisOnly = (str: string) => {
   const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
@@ -37,6 +38,9 @@ type TabProps = {
 };
 
 let isDeleting = false;
+
+const showDeleteSeconds = 0.05;
+const showDeleteTabButton = signal(false);
 
 const Tab = ({ tab }: TabProps) => {
   const theme = useTheme();
@@ -65,6 +69,7 @@ const Tab = ({ tab }: TabProps) => {
 
   const exitEditMode = () => {
     setEditMode(false);
+    showDeleteTabButton.value = false;
     if (isNewTab()) newTabId.value = '';
   };
 
@@ -85,6 +90,13 @@ const Tab = ({ tab }: TabProps) => {
   const isNewTab = () => newTabId.value === tab.id;
 
   const isEmojiTab = useMemo(() => hasOneToThreeEmojisOnly(title), [title]);
+
+  const enterEditMode = () => {
+    setEditMode(true);
+    setTimeout(() => {
+      showDeleteTabButton.value = true;
+    }, showDeleteSeconds * 1000);
+  };
 
   return (
     <div
@@ -108,7 +120,7 @@ const Tab = ({ tab }: TabProps) => {
       onClick={handleClick}
       key={tab.id}
       tabIndex={tab.order}
-      onDoubleClick={() => setEditMode(true)}
+      onDoubleClick={enterEditMode}
     >
       {!editMode ? (
         <div className={!isEmojiTab && 'tab-text-cutoff'}>
@@ -144,7 +156,7 @@ const Tab = ({ tab }: TabProps) => {
             // }}
           />
           {!isNewTab() && (
-            <div className='tab-delete-button-container'>
+            <div className={'tab-delete-button-container' + (showDeleteTabButton.value ? ' visible' : '')}>
               <IconButton
                 color={theme.palette.secondary.main} //theme.palette.background.background
                 icon={faCircleXmark}

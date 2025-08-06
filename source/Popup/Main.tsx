@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 // import ReactQuill from 'react-quill';
 // import 'react-quill/dist/quill.snow.css';
 // import {browser, Tabs} from 'webextension-polyfill-ts';
@@ -6,7 +6,6 @@ import React, { useEffect, useState } from 'react';
 import Editor from './components/Editor/Editor';
 import TabBar from './components/TabBar/TabBar';
 import ContextMenu from './components/ContextMenu/ContextMenu';
-import { showContextMenu } from './signal/contextMenu';
 import { useTheme } from '@mui/material/styles';
 import styled from 'styled-components';
 
@@ -15,14 +14,12 @@ import styled from 'styled-components';
 // }
 
 import './styles.scss';
-import PopoutButton from './components/PopoutButton/PopoutButton';
 import { popoutSettings } from './settings/settings';
 import { isStandalone } from './signal/popout';
 import Settings from './components/Settings/Settings';
 import { updateTabDataOnRefocus } from './signal/todoData';
 import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedWindow';
-import { mode } from './signal/app';
-import { createBackup } from './storage/backup';
+import { isLoading, mode } from './signal/app';
 import { waitForDbAccessEnd } from './storage/storage';
 
 const closeWhenFocusIsLost = false;
@@ -35,13 +32,11 @@ const Main: React.FC = () => {
     chrome.windows.getCurrent((window) => {
       if (window.type === 'popup' && window.width === popoutSettings.width && window.height === popoutSettings.height) {
         isStandalone.value = true;
-        console.log('pop-out');
         // const mainDiv = document.querySelector('.main-container') as HTMLElement;
         // mainDiv.style.width = `100% !important`;
         // mainDiv.style.height = `100% !important`;
       } else {
         isStandalone.value = false;
-        console.log('in-extension');
       }
     });
   }, []);
@@ -95,12 +90,12 @@ const Main: React.FC = () => {
       await waitForDbAccessEnd();
       setTimeout(() => {
         window.close();
-      }, 10);
+      }, 100);
     };
 
     // window.addEventListener('focus', getFromLocal); // updateTabDataOnRefocus
     window.addEventListener('focus', updateTabDataOnRefocus);
-    window.addEventListener('blur', () => createBackup());
+    // window.addEventListener('blur', () => createBackup());
 
     if (closeWhenFocusIsLost) window.addEventListener('blur', handleBlur);
     return () => {
@@ -119,7 +114,7 @@ const Main: React.FC = () => {
           <>
             <ContextMenu />
             <TabBar />
-            <Editor />
+            {isLoading ? <div>Loading...</div> : <Editor />}
           </>
         )}
         {mode.value === 'recently-deleted' && <RecentlyDeletedWindow />}

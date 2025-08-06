@@ -1,23 +1,16 @@
 import React from 'react';
 import '../TabBar.scss';
-import { batch } from '@preact/signals-react';
-import { currentTab, tabList } from '../../../signal/todoData';
 import { useTheme } from '@mui/material/styles';
-import { getTabs, newTab } from '../../../storage/storage';
 import { newTabId } from '../TabBar';
+import { createTab } from '../../../storage/dataManagement';
 
 const TabBarButton = ({ tabBarRef }: { tabBarRef: React.MutableRefObject<HTMLDivElement> }) => {
   //React.MutableRefObject<HTMLDivElement>
   const theme = useTheme();
 
   const createNewTab = async () => {
-    const newTabItem = await newTab();
-    const tabs = await getTabs();
+    const newTabItem = await createTab();
     newTabId.value = newTabItem.id;
-    batch(() => {
-      tabList.value = tabs;
-      currentTab.value = newTabItem.id;
-    });
     setTimeout(() => {
       scrollToRight();
     }, 40);

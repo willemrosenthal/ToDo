@@ -3,7 +3,6 @@ import { Drawer, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { customPalette, paletteDrawerOpen, selectedPaletteName, PaletteName } from '../../signal/settings';
-import { saveTab } from '../../signal/todoData_old';
 import StyledScrollBar from '../StyledWrapper/StyledScrollBar';
 import { signal } from '@preact/signals-react';
 import { saveSettings } from '../../storage/storage';

@@ -1,107 +1,140 @@
-import { batch, effect, signal } from '@preact/signals-react';
-import { findLowestMissingId } from '../utils/utils';
-import { PaletteName, selectedPaletteName, Settings } from './settings';
+import { batch, computed, effect, signal } from '@preact/signals-react';
+import { selectedPaletteName, Settings } from './settings';
 import { customPalette } from './settings';
-import { PaletteColors } from '../theme/theme';
-import { TabType } from '../types';
-import { v4 as uuidv4 } from 'uuid';
-import { deleteTab, getTabs, loadSettings, newTab, saveTabData, updateTab } from '../storage/storage';
+import { TabContent, TabType, UserData } from '../types';
+import {
+  deleteTab,
+  getAllTabsData,
+  getUserData,
+  getTabData,
+  getTabs,
+  isTabDataFormat,
+  loadSettings,
+  saveUserData,
+  saveTabData,
+  updateTab,
+} from '../storage/storage';
 import { convertFromOldFormat } from './migrateData';
-// default data
-const initialTab: TabType = {
-  id: uuidv4(),
-  order: 0,
-  title: 'To Do',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
+import { isLoading, loadingState, minLoadTime } from './app';
 
 export type TabUpdateType = {
   content?: string;
   id?: string;
 };
 
+export type TabToContentMap = Map<string, string>;
+
 // signals
 export const tabList = signal<TabType[]>([]);
 export const currentTab = signal<string>();
-export const loadingTabData = signal<boolean>(true);
 export const settings = signal<Settings>();
+export const tabContents = signal<TabToContentMap>(new Map());
 
+export const setLoadedData = ({
+  tabsFound,
+  contentMap,
+  settings,
+  userData,
+}: {
+  tabsFound: TabType[];
+  contentMap: TabToContentMap;
+  settings: Settings;
+  userData: UserData;
+}) => {
+  batch(() => {
+    const startingTabId = userData?.lastTabId ?? tabsFound[0].id;
+    tabList.value = tabsFound;
+    tabContents.value = contentMap;
+    currentTab.value = startingTabId;
+    loadingState.value = 'complete';
+
+    // set the settings
+    if (settings) {
+      if (settings.selectedPalette) selectedPaletteName.value = settings.selectedPalette;
+      if (settings.palette) customPalette.value = settings.palette;
+    }
+  });
+};
+
+// fetch all tabs, all tab data, and all settings
 const getInitialData = async () => {
+  // don't continue if we are already loading
+  if (loadingState.value === 'loading') return;
+  loadingState.value = 'loading';
+
+  const currentTimeInMS = Date.now();
+  console.log('time', currentTimeInMS);
+
   const tabsFound = await getTabs();
   const settings: Settings = await loadSettings();
+  const tabsData = await getAllTabsData();
+  const userData = await getUserData();
 
-  console.log('🐶 fetchedTabs', tabsFound);
+  // create map of tab data (if the tab data contains ids)
+  const contentMap: TabToContentMap = new Map();
+  tabsData.forEach((td) => {
+    if (isTabDataFormat(td)) {
+      contentMap.set(td.id, td.content);
+    }
+  });
+
+  // check to see if we are missing any tab data (due to old format)
+  for (const tab of tabsFound) {
+    if (!contentMap.has(tab.id)) {
+      // get data for tab missing it's content
+      const dataForTab = await getTabData(tab.id);
+      // update the tab in the DB to the new format
+      saveTabData(tab.id, dataForTab);
+      // add it to the map
+      contentMap.set(tab.id, dataForTab);
+    }
+  }
+
+  // check to see if we are missing any tab data (likely due to old format)
+  if (tabsData.length !== contentMap.size) {
+    const tabsMissingData = tabsFound.filter((td) => !contentMap.has(td.id));
+    console.warn('🐶 missing tab data for: ', tabsMissingData.length, 'tabs.');
+    tabsMissingData.forEach((td) => {
+      console.warn('🐶 missing tab data for: ', td.id, td.title);
+    });
+  }
+
+  // wait for min time to elapse
+  const timeElapsed = Date.now() - currentTimeInMS;
+  const timeToWait = minLoadTime - timeElapsed;
+  if (timeToWait > 0) {
+    setTimeout(() => {
+      loadingState.value = 'complete';
+    }, timeToWait);
+  }
+
   if (tabsFound.length > 0) {
-    batch(() => {
-      tabList.value = tabsFound;
-      currentTab.value = tabsFound[0].id;
-
-      // set the settings
-      if (settings) {
-        if (settings.selectedPalette) selectedPaletteName.value = settings.selectedPalette;
-        if (settings.palette) customPalette.value = settings.palette;
-      }
+    setLoadedData({
+      tabsFound,
+      contentMap,
+      settings,
+      userData,
     });
   } else {
     convertFromOldFormat();
   }
 };
 
-const findClosestTab = (tab: TabType) => {
-  const order = tab.order;
-  let neighbor = tabList.value.find((t) => t.order === order - 1);
-  if (neighbor) return neighbor;
-  return tabList.value.find((t) => t.order === order + 1);
-};
-
-export const handleDeleteTab = async (tabToDelete: TabType) => {
-  const deleteId = tabToDelete.id;
-  const deleteOrderNumber = tabToDelete.order;
-  // get tab to switch to
-  const switchToTab = findClosestTab(tabToDelete);
-
-  // delete the tab
-  await deleteTab(deleteId);
-
-  // update the order of the remaining tabs
-  for (const tabToOrder of tabList.value) {
-    console.log('💖 tabToOrder', tabToOrder);
-    if (tabToOrder.order > deleteOrderNumber) {
-      tabToOrder.order--;
-      console.log('💖 updating tab', tabToOrder);
-      await updateTab(tabToOrder);
-    }
-  }
-
-  batch(() => {
-    // remove tab to delete from tabList
-    tabList.value = tabList.value.filter((tab) => tab.id !== deleteId);
-    console.log('💖 updated tabList', tabList.value);
-
-    // if there are tabs left, set the current tab to the previous tab
-    if (tabList.value.length > 0) {
-      console.log('💖 switching to tab', switchToTab);
-      currentTab.value = switchToTab.id;
-    }
-  });
-};
-
 // get tabs from storage.
-getInitialData();
-
 effect(() => {
-  if (currentTab.value) {
-    loadingTabData.value = true;
+  if (loadingState.value === 'initial') {
+    // getInitialData();
   }
 });
 
 effect(() => {
-  console.log('✅ tabList', tabList.value);
+  // save last tab we visited
+  if (currentTab.value && !isLoading) {
+    saveUserData({ lastTabId: currentTab.value });
+  }
 });
 
 export function updateTabDataOnRefocus() {
-  loadingTabData.value = true;
-  currentTab.value = '';
+  console.log('REFOCUSED: re-loading data');
   getInitialData();
 }

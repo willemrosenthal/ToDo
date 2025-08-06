@@ -5,7 +5,6 @@ import { mode } from '../../../signal/app';
 
 const RecentlyDeleted = () => {
   const showRecentlyDeleted = () => {
-    console.log('showRecentlyDeleted');
     mode.value = 'recently-deleted';
   };
 

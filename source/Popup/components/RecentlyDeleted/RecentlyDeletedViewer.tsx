@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { RecentlyDeleted, TabType } from '../../types';
 import { useTheme } from '@mui/material/styles';
-import { saveTabData, newTab, deleteRecentlyDeleted, getTabs } from '../../storage/storage';
+import { deleteRecentlyDeleted } from '../../storage/storage';
 import { CircularProgress } from '@mui/material';
 import { mode } from '../../signal/app';
-import { currentTab, tabList } from '../../signal/todoData';
-import { batch } from '@preact/signals-react';
+import { createTab } from '../../storage/dataManagement';
 interface RecentlyDeletedViewerProps {
   selected: RecentlyDeleted;
 }
@@ -24,8 +23,6 @@ const RecentlyDeletedViewer = ({ selected }: RecentlyDeletedViewerProps) => {
     return formatted;
   };
 
-  console.log('selected.data', selected?.data);
-
   const handleRestore = async () => {
     setRestoringInProgress(true);
     const restoredTabPartial: Partial<TabType> = {
@@ -33,16 +30,9 @@ const RecentlyDeletedViewer = ({ selected }: RecentlyDeletedViewerProps) => {
       createdAt: selected.createdAt,
       updatedAt: selected.deletedAt,
     };
-    const restoredTab = await newTab(restoredTabPartial);
-    console.log('restoredTab', restoredTab);
-    await saveTabData(restoredTab.id, selected.data);
+    await createTab(restoredTabPartial);
     await deleteRecentlyDeleted(selected.id);
-    const allTabs = await getTabs();
-    batch(() => {
-      tabList.value = allTabs;
-      currentTab.value = restoredTab.id;
-      mode.value = 'main';
-    });
+    mode.value = 'main';
     setRestoringInProgress(false);
   };
 

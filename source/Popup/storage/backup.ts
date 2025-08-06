@@ -46,22 +46,14 @@ interface BackupData {
 const backupKey = 'todo-backups';
 
 export const createBackup = async (download?: boolean): Promise<void> => {
-  console.log('⬇️createBackup');
   try {
     const db = await openDB('toDoList', 1);
-
-    console.log('db', db);
 
     // Collect all data from each store
     const tabs = await db.getAll(STORES.TABS);
     const recentlyDeleted = await db.getAll(STORES.RECENTLY_DELETED);
     const settings = await db.getAll(STORES.SETTINGS);
-    const user = await db.getAll(STORES.USER);
-
-    console.log('tabs', tabs);
-    console.log('recentlyDeleted', recentlyDeleted);
-    console.log('settings', settings);
-    console.log('user', user);
+    const user = await db.getAll(STORES.USER_DATA);
 
     // Get tab data for each tab
     const tabData: Record<string, any> = {};
@@ -80,12 +72,8 @@ export const createBackup = async (download?: boolean): Promise<void> => {
       user,
     };
 
-    console.log('backupData', backupData);
-
     // Convert to JSON string
     const jsonString = JSON.stringify(backupData, null, 2);
-
-    console.log('jsonString', jsonString);
 
     // Create filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -107,7 +95,6 @@ export const createBackup = async (download?: boolean): Promise<void> => {
         });
 
         const writable = await handle.createWritable();
-        console.log('writable', writable);
         await writable.write(jsonString);
         await writable.close();
 
@@ -130,12 +117,10 @@ export const createBackup = async (download?: boolean): Promise<void> => {
     // save in local storage
     const getExistingBackups = localStorage.getItem(backupKey);
     const parsedBackups = getExistingBackups ? JSON.parse(getExistingBackups) : [];
-    console.log('parsedBackups', parsedBackups);
     parsedBackups.push(jsonString);
     if (parsedBackups.length > maxBackups) {
       parsedBackups.shift();
     }
-    console.log('parsedBackups', parsedBackups);
     localStorage.setItem(backupKey, JSON.stringify(parsedBackups));
   } catch (error) {
     console.error('❌ Error creating backup:', error);
@@ -182,7 +167,7 @@ export const restoreFromBackup = async (backupData: BackupData): Promise<void> =
     await db.clear(STORES.TAB_DATA);
     await db.clear(STORES.RECENTLY_DELETED);
     await db.clear(STORES.SETTINGS);
-    await db.clear(STORES.USER);
+    await db.clear(STORES.USER_DATA);
 
     // Restore tabs
     for (const tab of backupData.tabs) {
@@ -209,7 +194,7 @@ export const restoreFromBackup = async (backupData: BackupData): Promise<void> =
 
     // Restore user data
     for (const [key, value] of Object.entries(backupData.user)) {
-      await db.put(STORES.USER, value, key);
+      await db.put(STORES.USER_DATA, value, key);
     }
 
     console.log('✅ Backup restored successfully');

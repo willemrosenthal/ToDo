@@ -26,7 +26,6 @@ const TabBar = () => {
   // get tabs from storage.
   useSignalEffect(() => {
     if (typeof tabList.value !== 'undefined') {
-      console.log('🛠️ tabList', tabList.value);
       setTabs(tabList.value);
     }
   });

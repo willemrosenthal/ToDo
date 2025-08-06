@@ -52,7 +52,6 @@ const RecentlyDeletedSidebar = ({ setSelected, selected }: RecentlyDeletedSideba
 
   const handleRestoreFromFile = async () => {
     const backupData = await loadBackupFile();
-    console.log('backupData', backupData);
     await restoreFromBackup(backupData);
     const allTabs = await getTabs();
     batch(() => {

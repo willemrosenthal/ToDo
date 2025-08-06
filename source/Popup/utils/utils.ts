@@ -14,3 +14,7 @@ export function findLowestMissingId(nums: number[]): number {
 
   return expectedNum;
 }
+
+export const waitFor = async (seconds: number = 0.2) => {
+  await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+};
