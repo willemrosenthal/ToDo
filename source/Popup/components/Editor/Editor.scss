@@ -26,6 +26,8 @@
 
 .ql-editor ul {
   padding-left: 0.5em !important;
+  // checkbox
+
 }
 .ql-editor ol {
   padding-left: 1em !important;
@@ -79,6 +81,14 @@
   position: absolute;
   top: 1px;
   transform: translateX(2px);
+}
+
+// Checkbox-style list items - target any li with checkbox content
+.ql-editor ul[data-checked=true]>li:before {
+  transform: translateX(2px) translateY(-2.5px) !important;
+}
+.ql-editor ul[data-checked=false]>li:before {
+  transform: translateX(2px) translateY(-2.5px) !important;
 }
 
 .quill-context {

@@ -31,7 +31,6 @@ const Editor = () => {
 
   const saveDataToDb = (newContent: string) => {
     if (currentTabId && currentTab.value === currentTabId) {
-      console.log('Data Change for tab: ', currentTabId);
       // ave content to DB
       saveTabData(currentTabId, newContent);
       // update the tabContents map
@@ -42,7 +41,6 @@ const Editor = () => {
   // display data for current tab
   useSignalEffect(() => {
     if (currentTab.value && currentTab.value !== currentTabId) {
-      console.log('Display content for tab: ', currentTab.value);
       const tabData = tabContents.value.get(currentTab.value) || '';
       setValue(tabData);
       setCurrentTabId(currentTab.value);

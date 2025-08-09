@@ -9,6 +9,7 @@ import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import IconButton from '../IconButton/IconButton';
 import { newTabId } from '../TabBar/TabBar';
 import { handleDeleteTab } from '../../storage/dataManagement';
+import { isLoading } from '../../signal/app';
 
 // const isEmoji = (str: string) => {
 //   // Match most emoji grapheme clusters
@@ -61,6 +62,30 @@ const Tab = ({ tab }: TabProps) => {
 
   useSignalEffect(() => {
     setIsSelected(currentTab.value === tab.id);
+    // if the tab is selected, scroll to it (if it's not fully visible)
+    if (currentTab.value === tab.id && !isLoading.value) {
+      setTimeout(() => {
+        const tabBar = document.getElementById('tab-bar-tabs');
+        const tabElement = document.getElementById(tab.id);
+        if (tabElement && tabBar) {
+          const tabRect = tabElement?.getBoundingClientRect();
+          const tabXCenter = tabRect.x + tabRect.width / 2;
+          const xDistanceToTab = tabXCenter - window.innerWidth / 2;
+          const tabDir = Math.sign(xDistanceToTab);
+          const distToTabEdge = tabXCenter + tabRect.width * 0.5 * tabDir - window.innerWidth / 2;
+          const offScreenDistance = Math.abs(distToTabEdge) - window.innerWidth / 2;
+
+          if (offScreenDistance > 0) {
+            const overShootBy = tabRect.width * 0.5;
+            const scrollBy = (offScreenDistance + overShootBy) * tabDir;
+            tabBar.scrollBy({
+              left: scrollBy,
+              behavior: 'smooth',
+            });
+          }
+        }
+      }, 100);
+    }
   });
 
   const handleTitleChange = (e) => {
@@ -100,6 +125,7 @@ const Tab = ({ tab }: TabProps) => {
 
   return (
     <div
+      id={tab.id}
       style={{
         backgroundColor: currentTab.value === tab.id ? theme.palette.background.default : theme.palette.background.inactive,
         color: isSelected ? theme.palette.text.primary : theme.palette.text.secondary,

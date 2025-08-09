@@ -21,6 +21,7 @@ import { updateTabDataOnRefocus } from './signal/todoData';
 import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedWindow';
 import { isLoading, mode } from './signal/app';
 import { waitForDbAccessEnd } from './storage/storage';
+import SpinnerOverlay from './components/Spinner/SpinnerOverlay';
 
 const closeWhenFocusIsLost = false;
 
@@ -112,9 +113,10 @@ const Main: React.FC = () => {
         {/* {showContextMenu.value && <ContextMenu />} */}
         {mode.value === 'main' && (
           <>
+            {isLoading.value && <SpinnerOverlay />}
             <ContextMenu />
             <TabBar />
-            {isLoading ? <div>Loading...</div> : <Editor />}
+            <Editor />
           </>
         )}
         {mode.value === 'recently-deleted' && <RecentlyDeletedWindow />}

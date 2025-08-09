@@ -12,10 +12,10 @@ import {
   loadSettings,
   saveUserData,
   saveTabData,
-  updateTab,
 } from '../storage/storage';
 import { convertFromOldFormat } from './migrateData';
-import { isLoading, loadingState, minLoadTime } from './app';
+import { isLoading, loadingState, minLoadTime, mode } from './app';
+import { waitFor } from '../utils/utils';
 
 export type TabUpdateType = {
   content?: string;
@@ -63,7 +63,6 @@ const getInitialData = async () => {
   loadingState.value = 'loading';
 
   const currentTimeInMS = Date.now();
-  console.log('time', currentTimeInMS);
 
   const tabsFound = await getTabs();
   const settings: Settings = await loadSettings();
@@ -101,11 +100,9 @@ const getInitialData = async () => {
 
   // wait for min time to elapse
   const timeElapsed = Date.now() - currentTimeInMS;
-  const timeToWait = minLoadTime - timeElapsed;
+  const timeToWait = (minLoadTime - timeElapsed) / 1000; // sec
   if (timeToWait > 0) {
-    setTimeout(() => {
-      loadingState.value = 'complete';
-    }, timeToWait);
+    await waitFor(timeToWait);
   }
 
   if (tabsFound.length > 0) {
@@ -123,18 +120,17 @@ const getInitialData = async () => {
 // get tabs from storage.
 effect(() => {
   if (loadingState.value === 'initial') {
-    // getInitialData();
+    getInitialData();
   }
 });
 
 effect(() => {
   // save last tab we visited
-  if (currentTab.value && !isLoading) {
+  if (currentTab.value && !isLoading.value) {
     saveUserData({ lastTabId: currentTab.value });
   }
 });
 
 export function updateTabDataOnRefocus() {
-  console.log('REFOCUSED: re-loading data');
   getInitialData();
 }

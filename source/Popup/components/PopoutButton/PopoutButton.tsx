@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import './PopoutButton.scss';
 import { useTheme } from '@mui/material/styles';
-import IconButton from '../IconButton/IconButton'
+import IconButton from '../IconButton/IconButton';
 
 const PopoutButton: React.FC = () => {
   const theme = useTheme();
@@ -19,9 +19,7 @@ const PopoutButton: React.FC = () => {
     window.close();
   };
 
-  return (
-    <IconButton icon={faUpRightFromSquare} callback={openStandaloneWindow} />
-  )
+  return <IconButton icon={faUpRightFromSquare} callback={openStandaloneWindow} />;
   return (
     <div className='popout-button'>
       <button onClick={openStandaloneWindow}>
