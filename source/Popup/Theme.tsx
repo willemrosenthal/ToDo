@@ -10,9 +10,9 @@ import { currentTheme } from './signal/settings';
 export const ThemedApp = () => {
   const [theme, setTheme] = useState(themes['classic']);
 
-  useSignalEffect(()=>{
+  useSignalEffect(() => {
     setTheme(currentTheme.value as Theme);
-  })
+  });
 
   return (
     <ThemeProvider theme={theme}>

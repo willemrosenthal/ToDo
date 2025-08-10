@@ -11,8 +11,14 @@ export type Settings = {
   selectedPalette: PaletteName | string;
 };
 
-export const selectedPaletteName = signal<PaletteName | string>('classic');
+const loadedSelectedPalette = localStorage.getItem('selectedPalette');
+export const selectedPaletteName = signal<PaletteName | string>(loadedSelectedPalette || 'classic');
 export const customPalette = signal<PaletteColors | Palette>(themes['dark'].palette);
+
+// store selected palette in local storage
+effect(() => {
+  localStorage.setItem('selectedPalette', selectedPaletteName.value);
+});
 
 // export const currentPallette = signal<PaletteColors | Palette>(themes['classic'].palette);
 export const currentTheme = signal<ThemeOptions>(themes['classic']);
