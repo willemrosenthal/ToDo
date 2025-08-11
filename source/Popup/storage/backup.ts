@@ -45,7 +45,44 @@ interface BackupData {
 
 const backupKey = 'todo-backups';
 
-export const createBackup = async (download?: boolean): Promise<void> => {
+const isDataToCacheNew = (dataToCache: BackupData): boolean => {
+  const currentCached = localStorage.getItem(backupKey);
+  if (!currentCached) return true;
+  const allBackups = JSON.parse(currentCached);
+  const mostRecentBackup = JSON.parse(allBackups[allBackups.length - 1]);
+
+  console.log('mostRecentBackup', mostRecentBackup);
+  console.log('dataToCache', dataToCache);
+
+  const remove = ['updatedAt', 'timestamp', 'lastTabId'];
+
+  const mostRecentBackupWithoutTimestamps = deeplyRemoveAllKeys(mostRecentBackup, remove);
+  const dataToCacheWithoutTimestamps = deeplyRemoveAllKeys(dataToCache, remove);
+
+  console.log('mostRecentBackupWithoutTimestamps', mostRecentBackupWithoutTimestamps);
+  console.log('dataToCacheWithoutTimestamps', dataToCacheWithoutTimestamps);
+
+  return JSON.stringify(mostRecentBackupWithoutTimestamps) !== JSON.stringify(dataToCacheWithoutTimestamps);
+};
+
+const deeplyRemoveAllKeys = (obj: any, keys: string[]) => {
+  Object.entries(obj).forEach(([key, value]) => {
+    if (keys.includes(key)) {
+      delete obj[key];
+    }
+    if (typeof value === 'object') {
+      deeplyRemoveAllKeys(value, keys);
+    }
+  });
+  return obj;
+};
+
+interface BackupOptions {
+  type?: 'cache' | 'download';
+}
+
+export const createBackup = async (options: BackupOptions = { type: 'cache' }): Promise<void> => {
+  console.log('Creating Backup: type:', options.type);
   try {
     const db = await openDB('toDoList', 1);
 
@@ -79,7 +116,7 @@ export const createBackup = async (download?: boolean): Promise<void> => {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `todo-backup-${timestamp}.json`;
 
-    if (download) {
+    if (options.type === 'download') {
       // Use File System Access API to save the file
       if ('showSaveFilePicker' in window) {
         const handle = await window.showSaveFilePicker({
@@ -115,6 +152,12 @@ export const createBackup = async (download?: boolean): Promise<void> => {
       }
     }
     // save in local storage
+    const changesMade = isDataToCacheNew(backupData);
+    if (!changesMade) {
+      console.log('no changes made, not saving backup to local storage');
+      return;
+    }
+    console.log('saving backup to local storage');
     const getExistingBackups = localStorage.getItem(backupKey);
     const parsedBackups = getExistingBackups ? JSON.parse(getExistingBackups) : [];
     parsedBackups.push(jsonString);

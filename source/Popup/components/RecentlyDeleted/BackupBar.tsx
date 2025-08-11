@@ -16,7 +16,7 @@ const BackupBar = () => {
   };
 
   const handleBackup = () => {
-    createBackup(true);
+    createBackup({ type: 'download' });
   };
 
   const handleRestore = async () => {

@@ -22,6 +22,7 @@ import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedW
 import { isLoading, mode } from './signal/app';
 import { waitForDbAccessEnd } from './storage/storage';
 import SpinnerOverlay from './components/Spinner/SpinnerOverlay';
+import { createBackup } from './storage/backup';
 
 const closeWhenFocusIsLost = false;
 
@@ -94,14 +95,19 @@ const Main: React.FC = () => {
       }, 100);
     };
 
-    // window.addEventListener('focus', getFromLocal); // updateTabDataOnRefocus
-    window.addEventListener('focus', updateTabDataOnRefocus);
-    // window.addEventListener('blur', () => createBackup());
+    const createBackupOnBlur = async () => {
+      await createBackup({ type: 'cache' }); // backup before closing
+    };
 
+    window.addEventListener('focus', updateTabDataOnRefocus);
+    // backup on blur
+    window.addEventListener('blur', createBackupOnBlur);
     if (closeWhenFocusIsLost) window.addEventListener('blur', handleBlur);
+
     return () => {
       window.removeEventListener('focus', updateTabDataOnRefocus);
       if (closeWhenFocusIsLost) window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('blur', createBackupOnBlur);
     };
   }, []);
 
