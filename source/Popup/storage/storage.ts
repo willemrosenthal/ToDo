@@ -184,7 +184,7 @@ export const getAllTabsData = async (): Promise<TabContent[]> => {
 };
 
 export const isTabDataFormat = (td): boolean => {
-  return 'id' in td && 'content' in td;
+  return typeof td === 'object' && td !== null && 'id' in td && 'content' in td;
 };
 
 export const getTabData = async (tabId: string): Promise<string> => {
