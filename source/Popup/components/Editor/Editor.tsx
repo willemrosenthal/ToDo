@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 // import {browser, Tabs} from 'webextension-polyfill-ts';
@@ -11,109 +11,155 @@ import { useTheme } from '@mui/material/styles';
 import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
 import { saveTabData } from '../../storage/storage';
 
-const Editor = () => {
+// Memoized modules and formats to prevent recreation on every render
+const QUILL_MODULES = {
+  toolbar: [
+    [{ header: [1, 2, false] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block', 'script'],
+    [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+    ['link', 'image'],
+    ['clean'],
+  ],
+};
+
+const QUILL_FORMATS = [
+  'header',
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'blockquote',
+  'list',
+  'bullet',
+  'indent',
+  'link',
+  'image',
+  'code-block',
+  'script',
+];
+
+// Debounce function for expensive operations
+const debounce = (func: Function, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+const Editor = React.memo(() => {
   const [onContextMenu] = useContextMenu();
   const theme = useTheme();
   const quillRef = useRef<ReactQuill | null>(null);
   const [currentTabId, setCurrentTabId] = useState('');
   const [value, setValue] = useState('');
+  const styleElementRef = useRef<HTMLStyleElement | null>(null);
 
+  // Memoize the style object to prevent recreation
+  const style = useMemo(
+    () => ({
+      borderTop: `2px solid ${(theme.palette as any).border?.main || '#ccc'}`,
+      backgroundColor: theme.palette.background.default,
+    }),
+    [(theme.palette as any).border?.main, theme.palette.background.default],
+  );
+
+  // Create style element only once and update its content
   useEffect(() => {
-    const quillStyleElement = document.createElement('style');
-    // @ts-ignore
-    quillStyleElement.innerHTML = `.quill a { color: ${theme.palette.link.main} !important; }`;
-    document.head.appendChild(quillStyleElement);
+    if (!styleElementRef.current) {
+      styleElementRef.current = document.createElement('style');
+      document.head.appendChild(styleElementRef.current);
+    }
+
+    styleElementRef.current.innerHTML = `.quill a { color: ${(theme.palette as any).link?.main || '#007bff'} !important; }`;
 
     return () => {
-      document.head.removeChild(quillStyleElement);
+      if (styleElementRef.current) {
+        document.head.removeChild(styleElementRef.current);
+        styleElementRef.current = null;
+      }
     };
-  }, [theme]);
+  }, [(theme.palette as any).link?.main]);
 
-  const saveDataToDb = (newContent: string) => {
-    if (currentTabId && currentTab.value === currentTabId) {
-      // ave content to DB
-      saveTabData(currentTabId, newContent);
-      // update the tabContents map
-      tabContents.value.set(currentTabId, newContent);
-    }
-  };
+  // Debounced save function to prevent excessive database writes
+  const debouncedSaveDataToDb = useCallback(
+    debounce((newContent: string) => {
+      if (currentTabId && currentTab.value === currentTabId) {
+        saveTabData(currentTabId, newContent);
+        tabContents.value.set(currentTabId, newContent);
+      }
+    }, 300),
+    [currentTabId],
+  );
 
-  // display data for current tab
+  const saveDataToDb = useCallback(
+    (newContent: string) => {
+      debouncedSaveDataToDb(newContent);
+    },
+    [debouncedSaveDataToDb],
+  );
+
+  // Optimized tab switching - only update if content actually changed
   useSignalEffect(() => {
     if (currentTab.value && currentTab.value !== currentTabId) {
       const tabData = tabContents.value.get(currentTab.value) || '';
-      setValue(tabData);
+      // Only update if the content is different to prevent unnecessary re-renders
+      if (tabData !== value) {
+        setValue(tabData);
+      }
       setCurrentTabId(currentTab.value);
     }
   });
 
-  const handleContextMenu = (e) => {
-    if (!e.metaKey) return;
-    e.preventDefault();
-    const options = [
-      {
-        label: 'un-format',
-        callback: () => {
-          pressUiButton('clean');
-        },
-      },
-      {
-        label: 'code',
-        callback: () => {
-          pressUiButton('code-block');
-        },
-      },
-      {
-        label: 'snippet',
-        callback: () => {
-          pressUiButton('script');
-        },
-      },
-      {
-        label: 'quote',
-        callback: () => {
-          pressUiButton('blockquote');
-        },
-      },
-      {
-        label: 'strike',
-        callback: () => {
-          pressUiButton('strike');
-        },
-      },
-    ];
-    onContextMenu(e, options, 0, true);
-  };
+  // Memoize the value to prevent unnecessary re-renders
+  const memoizedValue = useMemo(() => value, [value]);
 
-  const modules = {
-    // syntax: true,
-    toolbar: [
-      [{ header: [1, 2, false] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block', 'script'],
-      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-      ['link', 'image'],
-      ['clean'],
-    ],
-  };
+  const handleContextMenu = useCallback(
+    (e) => {
+      if (!e.metaKey) return;
+      e.preventDefault();
+      const options = [
+        {
+          label: 'un-format',
+          callback: () => {
+            pressUiButton('clean');
+          },
+        },
+        {
+          label: 'code',
+          callback: () => {
+            pressUiButton('code-block');
+          },
+        },
+        {
+          label: 'snippet',
+          callback: () => {
+            pressUiButton('script');
+          },
+        },
+        {
+          label: 'quote',
+          callback: () => {
+            pressUiButton('blockquote');
+          },
+        },
+        {
+          label: 'strike',
+          callback: () => {
+            pressUiButton('strike');
+          },
+        },
+      ];
+      onContextMenu(e, options, 0, true);
+    },
+    [onContextMenu],
+  );
 
-  // what does this do?!?
-  const formats = [
-    'header',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'blockquote',
-    'list',
-    'bullet',
-    'indent',
-    'link',
-    'image',
-    'code-block',
-    'script',
-  ];
-
-  const findInlineCodeLength = (contents: any, offset: number) => {
+  const findInlineCodeLength = useCallback((contents: any, offset: number) => {
     let c = 0;
     for (let i = 0; i < contents.ops.length; i++) {
       const op = contents.ops[i];
@@ -126,119 +172,87 @@ const Editor = () => {
       }
     }
     return 0;
-  };
+  }, []);
 
-  // handle editor functions
-  const handleKeyDown = (event: KeyboardEvent) => {
-    const quill = quillRef.current?.getEditor();
-    if (!quill) return;
-
-    if (event.key === 'Backspace') {
-      const range = quill.getSelection();
-      if (range) {
-        const [line, offset] = quill.getLine(range.index);
-        const contentsBack = quill.getContents(range.index - 1);
-        if (contentsBack.ops?.length && contentsBack.ops.length > 1) {
-          if (contentsBack.ops[0].attributes?.script === 'sub') {
-            event.preventDefault();
-            const lineContents = quill.getContents(range.index - offset);
-            const inlineCodeLength = findInlineCodeLength(lineContents, offset);
-            quill.setSelection(range.index - inlineCodeLength, inlineCodeLength);
-            makeInlineCode();
-            quill.setSelection(range.index, 0);
-          }
-        }
-      }
-    }
-  };
-
-  // handle editor functions
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+  // Optimized keydown handler with memoization
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       const quill = quillRef.current?.getEditor();
       if (!quill) return;
 
-      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-      const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
-
-      if (isCtrlOrCmd && event.key === ']') {
-        event.preventDefault();
-        quill.format('indent', '+1');
-      } else if (isCtrlOrCmd && event.key === '[') {
-        event.preventDefault();
-        quill.format('indent', '-1');
-      } else if (isCtrlOrCmd && event.key === 'd') {
-        event.preventDefault();
+      if (event.key === 'Backspace') {
         const range = quill.getSelection();
         if (range) {
-          const qFormats = quill.getFormat(range);
-          const isStrikethrough = qFormats.strike === true;
-          quill.format('strike', !isStrikethrough);
-        }
-      } else if (isCtrlOrCmd && event.key === 'l') {
-        event.preventDefault();
-        const range = quill.getSelection();
-        if (range) {
-          //if (range && !range.isCollapsed) {
-          const text = quill.getText(range.index, range.length).trim();
-          const qFormats = quill.getFormat(range);
-          if (qFormats.link) {
-            // If the selected text is already a link, remove the link
-            quill.format('link', false);
-          } else {
-            // Check if the selected text is a valid URL
-            let url;
-            try {
-              url = new URL(text).toString();
-            } catch {
-              // If not a valid URL, you might want to handle this case differently
-              // For now, we'll just prepend "http://"
-              url = `http://${text}`;
+          const [line, offset] = quill.getLine(range.index);
+          const contentsBack = quill.getContents(range.index - 1);
+          if (contentsBack.ops?.length && contentsBack.ops.length > 1) {
+            if (contentsBack.ops[0].attributes?.script === 'sub') {
+              event.preventDefault();
+              const lineContents = quill.getContents(range.index - offset);
+              const inlineCodeLength = findInlineCodeLength(lineContents, offset);
+              quill.setSelection(range.index - inlineCodeLength, inlineCodeLength);
+              makeInlineCode();
+              quill.setSelection(range.index, 0);
             }
-
-            // Make the selected text a link using the selected text as the URL
-            quill.format('link', url);
           }
         }
-      } else if (isCtrlOrCmd && event.key === '/') {
-        event.preventDefault();
-        const range = quill.getSelection();
-        if (range) {
-          quill.removeFormat(range.index, range.length);
+      }
+    },
+    [findInlineCodeLength],
+  );
+
+  // Memoized keyboard shortcuts handler
+  const handleKeyboardShortcuts = useCallback((event: KeyboardEvent) => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill) return;
+
+    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+    const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+
+    if (isCtrlOrCmd && event.key === ']') {
+      event.preventDefault();
+      quill.format('indent', '+1');
+    } else if (isCtrlOrCmd && event.key === '[') {
+      event.preventDefault();
+      quill.format('indent', '-1');
+    } else if (isCtrlOrCmd && event.key === 'd') {
+      event.preventDefault();
+      const range = quill.getSelection();
+      if (range) {
+        const qFormats = quill.getFormat(range);
+        const isStrikethrough = qFormats.strike === true;
+        quill.format('strike', !isStrikethrough);
+      }
+    } else if (isCtrlOrCmd && event.key === 'l') {
+      event.preventDefault();
+      const range = quill.getSelection();
+      if (range) {
+        const text = quill.getText(range.index, range.length).trim();
+        const qFormats = quill.getFormat(range);
+        if (qFormats.link) {
+          quill.format('link', false);
+        } else {
+          let url;
+          try {
+            url = new URL(text).toString();
+          } catch {
+            url = `http://${text}`;
+          }
+          quill.format('link', url);
         }
       }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    } else if (isCtrlOrCmd && event.key === '/') {
+      event.preventDefault();
+      const range = quill.getSelection();
+      if (range) {
+        quill.removeFormat(range.index, range.length);
+      }
+    }
   }, []);
 
-  // // get line changes
-  // useEffect(() => {
-  //   const handleTextChange = () => {
-  //     const quill = quillRef.current?.getEditor();
-  //     if (!quill) return;
-
-  //     const range = quill.getSelection();
-  //     if (range) {
-  //       const [line, offset] = quill.getLine(range.index);
-  //       const lineText = line.domNode.innerText;
-  //       console.log('Current line text:', lineText);
-  //     }
-  //   };
-
-  //   const quill = quillRef.current?.getEditor();
-  //   quill?.on('text-change', handleTextChange);
-
-  //   return () => {
-  //     quill?.off('text-change', handleTextChange);
-  //   };
-  // }, []);
-  useEffect(() => {
-    const handleTextChange = (delta: any, oldDelta: any, source: any) => {
+  // Debounced text change handler to reduce expensive operations
+  const debouncedTextChangeHandler = useCallback(
+    debounce((delta: any, oldDelta: any, source: any) => {
       const quill = quillRef.current?.getEditor();
       if (!quill) return;
 
@@ -254,15 +268,10 @@ const Editor = () => {
         const headerLevel = headerMatch[1].length;
         const newText = lineText.replace(/^(#{1,3})\s/, '');
 
-        // Replace the line text without the #
         const lineIndex = quill.getIndex(line);
         quill.deleteText(lineIndex, lineText.length);
         quill.insertText(lineIndex, newText);
-
-        // Apply the header format
         quill.formatLine(lineIndex, newText.length, 'header', headerLevel);
-
-        // Move cursor to the end of the line
         quill.setSelection(lineIndex + newText.length, 0);
       }
 
@@ -271,15 +280,8 @@ const Editor = () => {
       const inlineCodeMatch = lineText.match(/`([^`]+)`/);
 
       if (codeBlockMatch) {
-        // const codeBlockText = codeBlockMatch[1];
-        // const codeBlockIndex = lineText.indexOf(codeBlockMatch[0]);
-        // quill.deleteText(range.index - lineText.length + codeBlockIndex, codeBlockMatch[0].length);
-        // quill.insertEmbed(range.index - lineText.length + codeBlockIndex, 'code-block', codeBlockText);
-        // quill.setSelection(range.index - lineText.length + codeBlockIndex + codeBlockText.length, 0);
         makeCodeBlock(quill, range);
-      }
-      // Handle inline code formatting
-      else if (inlineCodeMatch) {
+      } else if (inlineCodeMatch) {
         const cursorAtEndOfInlineCode = (line: string, chunk: string, offset: number) => {
           const chunkLength = chunk.length;
           const previousChunk = line.slice(offset - chunkLength, offset);
@@ -289,113 +291,89 @@ const Editor = () => {
         const inlineCodeText = inlineCodeMatch[1];
         const chunkEndIndex = atEndOfChunk ? range.index : range.index + inlineCodeMatch[1].length + 1;
         quill.deleteText(chunkEndIndex - inlineCodeMatch[0].length, inlineCodeMatch[0].length);
-        quill.insertText(chunkEndIndex - inlineCodeMatch[0].length, inlineCodeText + '\u200C'); //, 'code', true);
+        quill.insertText(chunkEndIndex - inlineCodeMatch[0].length, inlineCodeText + '\u200C');
         quill.setSelection(chunkEndIndex - inlineCodeMatch[0].length, inlineCodeText.length);
         makeInlineCode();
         quill.setSelection(range.index - 1, 0);
       }
+    }, 100),
+    [],
+  );
 
-      // const horizontalLineMatch = lineText.match(/^---\s*$/);
-      // if (horizontalLineMatch) {
-      //   const lineIndex = quill.getIndex(line);
-      //   quill.deleteText(lineIndex, lineText.length);
-      //   quill.insertEmbed(lineIndex, 'hr', true);
-
-      //   // Move cursor to the next line
-      //   quill.setSelection(lineIndex + 1, 0);
-      // }
-    };
-
-    const quill = quillRef.current?.getEditor();
-    quill?.on('text-change', handleTextChange);
+  // Set up event listeners only once
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyboardShortcuts);
 
     return () => {
-      quill?.off('text-change', handleTextChange);
+      document.removeEventListener('keydown', handleKeyboardShortcuts);
     };
-  }, []);
+  }, [handleKeyboardShortcuts]);
 
-  const makeCodeBlock = (_quill = undefined, _range = undefined) => {
-    // const quill = _quill || quillRef.current?.getEditor();
-    // if (!quill) return;
-    // const range = _range || quill.getSelection();
-    // if (!range) return;
-
-    // const qFormats = quill.getFormat(range);
-    // const isCodeBlock = qFormats['code-block'] === true;
-    // // if (isCodeBlock) {
-    // //   quill.removeFormat(range.index, range.length);
-    // // } else
-    // quill.format('code-block', !isCodeBlock);
-
-    // Select the button using querySelector
-    let codeblockButton = document.querySelector('.ql-code-block') as HTMLButtonElement; // You can also use a more specific selector
-    codeblockButton.click();
-  };
-
-  const pressUiButton = useCallback((key) => {
-    const button = document.querySelector(`.ql-${key}`) as HTMLButtonElement;
-    button.click();
-  }, []);
-
-  const makeInlineCode = () => {
-    // Select the button using querySelector
-    let inlineCodeButton = document.querySelector('.ql-script') as HTMLButtonElement; // You can also use a more specific selector
-    inlineCodeButton.click();
-  };
-
-  const removeStyleOnLine = () => {
-    // Select the button using querySelector
-    let cleanLineButton = document.querySelector('.ql-clean') as HTMLButtonElement; // You can also use a more specific selector
-    cleanLineButton.click();
-  };
-
-  const strikeThrough = () => {
-    // Select the button using querySelector
-    let strikeThroughButton = document.querySelector('.ql-strike') as HTMLButtonElement; // You can also use a more specific selector
-    strikeThroughButton.click();
-  };
-
-  /*
-  https://medium.com/@makenakong/how-to-customize-the-quill-toolbar-with-react-and-custom-blots-512a7b465339
-  */
-
-  // add context menu
-  // do we want this?
+  // Set up text change listener only once
   useEffect(() => {
-    requestAnimationFrame(() => {
+    const quill = quillRef.current?.getEditor();
+    if (quill) {
+      quill.on('text-change', debouncedTextChangeHandler);
+    }
+
+    return () => {
+      if (quill) {
+        quill.off('text-change', debouncedTextChangeHandler);
+      }
+    };
+  }, [debouncedTextChangeHandler]);
+
+  const makeCodeBlock = useCallback((_quill = undefined, _range = undefined) => {
+    let codeblockButton = document.querySelector('.ql-code-block') as HTMLButtonElement;
+    codeblockButton?.click();
+  }, []);
+
+  const pressUiButton = useCallback((key: string) => {
+    const button = document.querySelector(`.ql-${key}`) as HTMLButtonElement;
+    button?.click();
+  }, []);
+
+  const makeInlineCode = useCallback(() => {
+    let inlineCodeButton = document.querySelector('.ql-script') as HTMLButtonElement;
+    inlineCodeButton?.click();
+  }, []);
+
+  // Set up context menu only once
+  useEffect(() => {
+    const setupContextMenu = () => {
       const editorElement = document.querySelector('.ql-editor');
       if (editorElement) {
         editorElement.addEventListener('contextmenu', handleContextMenu);
         editorElement.addEventListener('mousedown', handleContextMenu);
       }
+    };
 
-      return () => {
-        if (editorElement) {
-          editorElement.removeEventListener('contextmenu', handleContextMenu);
-          editorElement.addEventListener('mousedown', handleContextMenu);
-        }
-      };
-    });
-  }, []);
+    // Use requestAnimationFrame to ensure DOM is ready
+    const timeoutId = setTimeout(setupContextMenu, 0);
 
-  const style = {
-    // borderColor: theme.palette.border.main,
-    // @ts-ignore
-    borderTop: `2px solid ${theme.palette.border.main}`,
-    backgroundColor: theme.palette.background.default,
-  };
+    return () => {
+      clearTimeout(timeoutId);
+      const editorElement = document.querySelector('.ql-editor');
+      if (editorElement) {
+        editorElement.removeEventListener('contextmenu', handleContextMenu);
+        editorElement.removeEventListener('mousedown', handleContextMenu);
+      }
+    };
+  }, [handleContextMenu]);
 
   return (
     <ReactQuill
       style={style}
       ref={quillRef}
-      value={value}
+      value={memoizedValue}
       onChange={saveDataToDb}
       onKeyDown={handleKeyDown}
-      modules={modules}
-      formats={formats}
+      modules={QUILL_MODULES}
+      formats={QUILL_FORMATS}
     />
   );
-};
+});
+
+Editor.displayName = 'Editor';
 
 export default Editor;

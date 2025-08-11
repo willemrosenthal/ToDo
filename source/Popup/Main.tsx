@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 // import 'react-quill/dist/quill.snow.css';
 // import {browser, Tabs} from 'webextension-polyfill-ts';
 
-import Editor from './components/Editor/Editor';
+import EditorWrapper from './components/Editor/EditorWrapper';
 import TabBar from './components/TabBar/TabBar';
 import ContextMenu from './components/ContextMenu/ContextMenu';
 import { useTheme } from '@mui/material/styles';
@@ -116,7 +116,7 @@ const Main: React.FC = () => {
             {isLoading.value && <SpinnerOverlay />}
             <ContextMenu />
             <TabBar />
-            <Editor />
+            <EditorWrapper />
           </>
         )}
         {mode.value === 'recently-deleted' && <RecentlyDeletedWindow />}
