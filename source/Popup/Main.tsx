@@ -22,7 +22,7 @@ import RecentlyDeletedWindow from './components/RecentlyDeleted/RecentlyDeletedW
 import { isLoading, mode } from './signal/app';
 import { waitForDbAccessEnd } from './storage/storage';
 import SpinnerOverlay from './components/Spinner/SpinnerOverlay';
-import { createBackup } from './storage/backup';
+import { createBackup } from './storage/backupData/backup';
 
 const closeWhenFocusIsLost = false;
 

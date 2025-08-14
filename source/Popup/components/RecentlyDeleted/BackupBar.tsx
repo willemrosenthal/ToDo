@@ -4,7 +4,7 @@ import { RecentlyDeleted } from '../../types';
 import { mode } from '../../signal/app';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { createBackup, loadBackupFile, restoreFromBackup, restoreMostRecentBackup } from '../../storage/backup';
+import { createBackup, loadBackupFile, restoreFromBackup, restoreMostRecentBackup } from '../../storage/backupData/backup';
 import { batch } from '@preact/signals-react';
 import { tabList, currentTab } from '../../signal/todoData';
 

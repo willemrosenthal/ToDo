@@ -1,10 +1,9 @@
 import { openDB } from 'idb';
-import { STORES } from './constants';
-import { TabType, RecentlyDeleted } from '../types';
-
+import { STORES } from '../constants';
+import { TabType, RecentlyDeleted } from '../../types';
+import backupLocally, { restoreLastCachedBackup } from './backupLocalCache';
 // Type declarations for File System Access API
 
-const maxBackups = 15;
 declare global {
   interface Window {
     showSaveFilePicker(options?: {
@@ -33,7 +32,7 @@ interface FileSystemWritableFileStream extends WritableStream {
   close(): Promise<void>;
 }
 
-interface BackupData {
+export interface BackupData {
   timestamp: string;
   version: string;
   tabs: TabType[];
@@ -42,40 +41,6 @@ interface BackupData {
   settings: Record<string, any>;
   user: Record<string, any>;
 }
-
-const backupKey = 'todo-backups';
-
-const isDataToCacheNew = (dataToCache: BackupData): boolean => {
-  const currentCached = localStorage.getItem(backupKey);
-  if (!currentCached) return true;
-  const allBackups = JSON.parse(currentCached);
-  const mostRecentBackup = JSON.parse(allBackups[allBackups.length - 1]);
-
-  console.log('mostRecentBackup', mostRecentBackup);
-  console.log('dataToCache', dataToCache);
-
-  const remove = ['updatedAt', 'timestamp', 'lastTabId'];
-
-  const mostRecentBackupWithoutTimestamps = deeplyRemoveAllKeys(mostRecentBackup, remove);
-  const dataToCacheWithoutTimestamps = deeplyRemoveAllKeys(dataToCache, remove);
-
-  console.log('mostRecentBackupWithoutTimestamps', mostRecentBackupWithoutTimestamps);
-  console.log('dataToCacheWithoutTimestamps', dataToCacheWithoutTimestamps);
-
-  return JSON.stringify(mostRecentBackupWithoutTimestamps) !== JSON.stringify(dataToCacheWithoutTimestamps);
-};
-
-const deeplyRemoveAllKeys = (obj: any, keys: string[]) => {
-  Object.entries(obj).forEach(([key, value]) => {
-    if (keys.includes(key)) {
-      delete obj[key];
-    }
-    if (typeof value === 'object') {
-      deeplyRemoveAllKeys(value, keys);
-    }
-  });
-  return obj;
-};
 
 interface BackupOptions {
   type?: 'cache' | 'download';
@@ -152,51 +117,15 @@ export const createBackup = async (options: BackupOptions = { type: 'cache' }): 
       }
     }
     // save in local storage
-    const changesMade = isDataToCacheNew(backupData);
-    if (!changesMade) {
-      console.log('no changes made, not saving backup to local storage');
-      return;
-    }
-    console.log('saving backup to local storage');
-    const getExistingBackups = localStorage.getItem(backupKey);
-    const parsedBackups = getExistingBackups ? JSON.parse(getExistingBackups) : [];
-    parsedBackups.push(jsonString);
-    if (parsedBackups.length > maxBackups) {
-      parsedBackups.shift();
-    }
-    localStorage.setItem(backupKey, JSON.stringify(parsedBackups));
+    backupLocally(backupData);
   } catch (error) {
     console.error('❌ Error creating backup:', error);
     throw error;
   }
 };
 
-export const getBackups = async (): Promise<BackupData[]> => {
-  const getExistingBackups = localStorage.getItem(backupKey);
-  if (!getExistingBackups) return [];
-
-  const backupStrings = JSON.parse(getExistingBackups);
-  return backupStrings.map((backupString: string) => JSON.parse(backupString));
-};
-
-export const restoreMostRecentBackup = async () => {
-  const backups = await getBackups();
-  console.log('backups', backups);
-
-  if (backups.length === 0) {
-    console.log('No backups available');
-    return;
-  }
-
-  const mostRecentBackup = backups[backups.length - 1];
-  console.log('mostRecentBackup', mostRecentBackup);
-
-  // remove most recent backup from local storage
-  const backupStrings = JSON.parse(localStorage.getItem(backupKey) || '[]');
-  backupStrings.pop();
-  localStorage.setItem(backupKey, JSON.stringify(backupStrings));
-
-  await restoreFromBackup(mostRecentBackup);
+export const restoreMostRecentBackup = () => {
+  restoreLastCachedBackup();
 };
 
 // Optional: Function to restore from backup
