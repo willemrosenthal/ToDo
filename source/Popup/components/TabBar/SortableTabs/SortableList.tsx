@@ -7,8 +7,9 @@ import { restrictToHorizontalAxis, restrictToParentElement } from '@dnd-kit/modi
 
 import './sortableList.scss';
 
+import { editingTab } from '../../../signal/app';
 import { DragHandle, SortableItem } from './SortableItem';
-// import { SortableOverlay } from './SortableOverlay';
+import { SortableOverlay } from './SortableOverlay';
 
 interface BaseItem {
   id: UniqueIdentifier;
@@ -27,7 +28,7 @@ export function SortableList<T extends BaseItem>({ items, onChange, renderItem }
   // Custom sensor with minimum drag distance threshold
   const dragDistanceSensor = useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 5, // Minimum 5px movement required
+      distance: editingTab.value ? 1000 : 5, // Minimum 5px movement required
     },
   });
 
@@ -65,7 +66,7 @@ export function SortableList<T extends BaseItem>({ items, onChange, renderItem }
           ))}
         </ul>
       </SortableContext>
-      {/* <SortableOverlay>{activeItem ? renderItem(activeItem) : null}</SortableOverlay> */}
+      <SortableOverlay>{activeItem ? renderItem(activeItem) : null}</SortableOverlay>
     </DndContext>
   );
 }

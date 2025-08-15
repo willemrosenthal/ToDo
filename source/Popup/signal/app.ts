@@ -6,3 +6,4 @@ export const isLoading = computed(() => loadingState.value !== 'complete');
 export const minLoadTime = 500;
 
 export const mode = signal<'main' | 'recently-deleted'>('main');
+export const editingTab = signal<boolean>(false);

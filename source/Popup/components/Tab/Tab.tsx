@@ -9,7 +9,7 @@ import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import IconButton from '../IconButton/IconButton';
 import { newTabId } from '../TabBar/TabBar';
 import { handleDeleteTab } from '../../storage/dataManagement';
-import { isLoading } from '../../signal/app';
+import { editingTab, isLoading } from '../../signal/app';
 
 // const isEmoji = (str: string) => {
 //   // Match most emoji grapheme clusters
@@ -53,6 +53,7 @@ const Tab = ({ tab }: TabProps) => {
   useSignalEffect(() => {
     if (newTabId.value === tab.id) {
       setEditMode(true);
+      editingTab.value = true;
     }
   });
 
@@ -94,6 +95,7 @@ const Tab = ({ tab }: TabProps) => {
 
   const exitEditMode = () => {
     setEditMode(false);
+    editingTab.value = false;
     showDeleteTabButton.value = false;
     if (isNewTab()) newTabId.value = '';
   };
@@ -118,6 +120,7 @@ const Tab = ({ tab }: TabProps) => {
 
   const enterEditMode = () => {
     setEditMode(true);
+    editingTab.value = true;
     setTimeout(() => {
       showDeleteTabButton.value = true;
     }, showDeleteSeconds * 1000);

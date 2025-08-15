@@ -22,6 +22,7 @@
 .sorting-tab-dragging {
   button {
     .tab {
+      opacity: 0;
       filter: brightness(1.1);
       border-top: 2px solid rgba(255, 255, 255, 0.333) !important;
       border-left: 2px solid rgba(255, 255, 255, 0.333) !important;
@@ -55,6 +56,10 @@
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
 
+}
+
+.tab.selected {
+  z-index: 10000;
 }
 
 .tab.selected[role="button"] {
