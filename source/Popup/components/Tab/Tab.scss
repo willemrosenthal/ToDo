@@ -16,7 +16,19 @@
   font-size: 13px;
   position: relative;
 
-  transition: width 0.2s ease-in-out;
+  transition: width, border, border-top, border-left, border-right, filter, box-shadow 0.2s ease-in-out;
+}
+
+.sorting-tab-dragging {
+  button {
+    .tab {
+      filter: brightness(1.1);
+      border-top: 2px solid rgba(255, 255, 255, 0.333) !important;
+      border-left: 2px solid rgba(255, 255, 255, 0.333) !important;
+      border-right: 2px solid rgba(255, 255, 255, 0.333) !important;
+      // box-shadow: 1px -1px 0 1px hsla(0, 0%, 100%, 0.5), -1px -1px 0 1px hsla(0, 0%, 100%, 0.5); 
+    }
+  }
 }
 
 .tab-text-cutoff {

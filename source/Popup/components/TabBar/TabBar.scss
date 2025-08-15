@@ -4,6 +4,12 @@
   z-index: 1;
   margin-bottom: -2px;
   height: 37px;
+  li {
+    list-style: none;
+    button {
+      background: transparent;
+    }
+  }
 }
 
 .tab-bar-tabs {

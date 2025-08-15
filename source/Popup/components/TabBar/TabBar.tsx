@@ -13,6 +13,7 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { TabType } from '../../types';
 import TabBarButton from './SubComponents/NewTabButton';
 import RecentlyDeleted from './SubComponents/RecentlyDeleted';
+import { SortableList } from './SortableTabs/SortableList';
 
 export const newTabId = signal<string>();
 const scrollPosition = signal<number | null>(null);
@@ -61,6 +62,18 @@ const TabBar = () => {
     return items;
   }, [tabs]);
 
+  const renderItem = (item: TabType) => {
+    return (
+      <SortableList.Item id={item.id}>
+        {/* {item.id} */}
+        <SortableList.DragHandle>
+          <Tab tab={item} key={item.id} />
+        </SortableList.DragHandle>
+      </SortableList.Item>
+    );
+    // return <Tab tab={item} key={item.id} />;
+  };
+
   return (
     <div className='tab-bar'>
       <div className='tab-bar-tabs' ref={tabBarRef} id='tab-bar-tabs'>
@@ -71,7 +84,8 @@ const TabBar = () => {
           }}
         />
         {!isStandalone.value && <PopoutButton />}
-        {tabItems}
+        {/* {tabItems} */}
+        <SortableList items={tabs} onChange={setTabs} renderItem={renderItem} />
         <TabBarButton tabBarRef={tabBarRef} />
         <RecentlyDeleted />
       </div>
