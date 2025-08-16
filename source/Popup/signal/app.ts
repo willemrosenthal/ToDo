@@ -7,3 +7,4 @@ export const minLoadTime = 500;
 
 export const mode = signal<'main' | 'recently-deleted'>('main');
 export const editingTab = signal<boolean>(false);
+export const dragPastEdge = signal<boolean>(false);

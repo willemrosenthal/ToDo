@@ -5,6 +5,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import './sortableList.scss';
+import { dragPastEdge } from '../../../signal/app';
 
 interface Props {
   id: UniqueIdentifier;
@@ -57,10 +58,12 @@ export function SortableItem({ children, id }: PropsWithChildren<Props>) {
 
   const el = useRef<HTMLDivElement>(null);
 
+  const releaseWithinDragArea = wasDragging && !dragPastEdge.value;
+
   return (
     <SortableItemContext.Provider value={context}>
       <li className='SortableItem' ref={setNodeRef} style={style}>
-        <div ref={el} className={isDragging || wasDragging ? 'sorting-tab-dragging' : ''}>
+        <div ref={el} className={isDragging || releaseWithinDragArea ? 'sorting-tab-dragging' : ''}>
           {children}
         </div>
       </li>
