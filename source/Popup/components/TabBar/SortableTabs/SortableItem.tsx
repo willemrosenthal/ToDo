@@ -44,7 +44,7 @@ export function SortableItem({ children, id }: PropsWithChildren<Props>) {
     } else if (!isDragging && wasDragging) {
       setTimeout(() => {
         setWasDragging(false);
-      }, animationDuration);
+      }, animationDuration - 10);
     }
   }, [isDragging, wasDragging]);
 
