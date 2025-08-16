@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './TabBar.scss';
 import { useSignalEffect, batch, signal } from '@preact/signals-react';
 import Tab from '../Tab/Tab';
@@ -60,25 +60,25 @@ const TabBar = () => {
     }
   });
 
-  const tabItems = useMemo(() => {
-    const items = tabs.map((tab) => {
-      return <Tab tab={tab} key={tab.id} />;
-    });
-    // jump to the saved scroll position
-    const prevScrollPosition = scrollPosition.value;
-    setTimeout(() => {
-      if (prevScrollPosition !== null) {
-        const tabBar = document.getElementById('tab-bar-tabs');
-        tabBar?.scrollTo({
-          left: prevScrollPosition,
-          behavior: 'auto',
-        });
-      }
-    }, 0);
-    return items;
-  }, [tabs]);
+  // const tabItems = useMemo(() => {
+  //   const items = tabs.map((tab) => {
+  //     return <Tab tab={tab} key={tab.id} />;
+  //   });
+  //   // jump to the saved scroll position
+  //   const prevScrollPosition = scrollPosition.value;
+  //   setTimeout(() => {
+  //     if (prevScrollPosition !== null) {
+  //       const tabBar = document.getElementById('tab-bar-tabs');
+  //       tabBar?.scrollTo({
+  //         left: prevScrollPosition,
+  //         behavior: 'auto',
+  //       });
+  //     }
+  //   }, 0);
+  //   return items;
+  // }, [tabs]);
 
-  const renderItem = (item: TabType) => {
+  const renderItem = useCallback((item: TabType) => {
     return (
       <SortableList.Item id={item.id}>
         {/* {item.id} */}
@@ -88,7 +88,7 @@ const TabBar = () => {
       </SortableList.Item>
     );
     // return <Tab tab={item} key={item.id} />;
-  };
+  }, []);
 
   return (
     //<div className='tab-bar' style={style}>
