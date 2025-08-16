@@ -107,6 +107,17 @@ export const updateTab = async (updates: Partial<TabType>) => {
   setAccessingDbResolved();
 };
 
+export const updateAllTabOrders = async (tabs: TabType[]) => {
+  setAccessingDb();
+  const db = await dbPromise;
+  tabs.forEach(async (tab) => {
+    const tabToUpdate = await db.get(STORES.TABS, tab.id);
+    tabToUpdate.order = tab.order;
+    await db.put(STORES.TABS, tabToUpdate, tab.id);
+  });
+  setAccessingDbResolved();
+};
+
 export const getRecentlyDeleted = async (): Promise<RecentlyDeleted[]> => {
   setAccessingDb();
   const db = await dbPromise;

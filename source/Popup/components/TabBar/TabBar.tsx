@@ -14,6 +14,7 @@ import { TabType } from '../../types';
 import TabBarButton from './SubComponents/NewTabButton';
 import RecentlyDeleted from './SubComponents/RecentlyDeleted';
 import { SortableList } from './SortableTabs/SortableList';
+import { updateAllTabOrders } from '../../storage/storage';
 
 export const newTabId = signal<string>();
 const scrollPosition = signal<number | null>(null);
@@ -44,6 +45,13 @@ const TabBar = () => {
   }, []);
 
   const [tabs, setTabs] = useState<TabType[]>([]);
+
+  const onTabOrderChange = (tabs: TabType[]) => {
+    const newTabOrder = tabs;
+    newTabOrder.forEach((tab, index) => (tab.order = index));
+    updateAllTabOrders(newTabOrder);
+    tabList.value = tabs;
+  };
 
   // get tabs from storage.
   useSignalEffect(() => {
@@ -94,7 +102,7 @@ const TabBar = () => {
         />
         {!isStandalone.value && <PopoutButton />}
         {/* {tabItems} */}
-        <SortableList items={tabs} onChange={setTabs} renderItem={renderItem} />
+        <SortableList items={tabs} onChange={onTabOrderChange} renderItem={renderItem} />
         <TabBarButton tabBarRef={tabBarRef} />
         <RecentlyDeleted />
       </div>
