@@ -102,11 +102,15 @@
 .tab-bottom {
   height: 2px;
   width: calc(100% + 4px);
-  // background-color: aqua;
   position: absolute;
   bottom: -2px;
   left: -2px;
-  z-index: 1000;
+  z-index: 1001;
+}
+
+.selected .tab-bottom {
+  height: 4px;
+  bottom: -3px;
 }
 
 .tab-delete-button-container {

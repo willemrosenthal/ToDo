@@ -10,6 +10,7 @@ import { useSignalEffect } from '@preact/signals-react';
 import { useTheme } from '@mui/material/styles';
 import { useContextMenu } from '../../hooks/useContextMenu/useContextMenu';
 import { saveTabData } from '../../storage/storage';
+import { isStandalone } from '../../signal/popout';
 
 // Memoized modules and formats to prevent recreation on every render
 const QUILL_MODULES = {
@@ -64,6 +65,7 @@ const Editor = React.memo(() => {
     () => ({
       borderTop: `2px solid ${(theme.palette as any).border?.main || '#ccc'}`,
       backgroundColor: theme.palette.background.default,
+      paddingBottom: isStandalone.value ? '0px' : '35px',
     }),
     [(theme.palette as any).border?.main, theme.palette.background.default],
   );

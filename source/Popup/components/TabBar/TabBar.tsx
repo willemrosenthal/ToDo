@@ -20,6 +20,14 @@ const scrollPosition = signal<number | null>(null);
 
 const TabBar = () => {
   const tabBarRef = useRef<HTMLDivElement>(null);
+  // const theme = useTheme();
+
+  // const style = useMemo(
+  //   () => ({
+  //     // boxShadow: `0 4px 4px ${theme.palette.background.default}`,
+  //   }),
+  //   [theme.palette.background.default],
+  // );
 
   // add a listener that saves the scroll position of the tab bar
   useEffect(() => {
@@ -75,6 +83,7 @@ const TabBar = () => {
   };
 
   return (
+    //<div className='tab-bar' style={style}>
     <div className='tab-bar'>
       <div className='tab-bar-tabs' ref={tabBarRef} id='tab-bar-tabs'>
         <IconButton
