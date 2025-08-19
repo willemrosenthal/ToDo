@@ -50,7 +50,6 @@ const setAccessingDbResolved = () => {
 };
 
 // Open (or create) the database
-console.log('A');
 const dbPromise = openDB('toDoList', 1, {
   upgrade(db) {
     db.createObjectStore(STORES.SETTINGS);
@@ -60,7 +59,6 @@ const dbPromise = openDB('toDoList', 1, {
     db.createObjectStore(STORES.USER_DATA);
   },
 });
-console.log('B');
 
 const maxRecentlyDeleted = 8;
 let totalTabs = 0;

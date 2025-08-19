@@ -14,7 +14,7 @@ import {
   saveTabData,
 } from '../storage/storage';
 import { convertFromOldFormat } from './migrateData';
-import { isLoading, loadingState, minLoadTime, mode } from './app';
+import { isLoading, loadingState, minLoadTime } from './app';
 import { waitFor } from '../utils/utils';
 
 export type TabUpdateType = {

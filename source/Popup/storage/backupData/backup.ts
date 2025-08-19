@@ -47,7 +47,6 @@ interface BackupOptions {
 }
 
 export const createBackup = async (options: BackupOptions = { type: 'cache' }): Promise<void> => {
-  console.log('Creating Backup: type:', options.type);
   try {
     const db = await openDB('toDoList', 1);
 

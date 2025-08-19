@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './TabBar.scss';
-import { useSignalEffect, batch, signal } from '@preact/signals-react';
+import { useSignalEffect, signal } from '@preact/signals-react';
 import Tab from '../Tab/Tab';
-import { currentTab, tabList } from '../../signal/todoData';
-import { useTheme } from '@mui/material/styles';
+import { tabList } from '../../signal/todoData';
 import { isStandalone } from '../../signal/popout';
 import PopoutButton from '../PopoutButton/PopoutButton';
 import IconButton from '../IconButton/IconButton';
@@ -21,14 +20,7 @@ const scrollPosition = signal<number | null>(null);
 
 const TabBar = () => {
   const tabBarRef = useRef<HTMLDivElement>(null);
-  // const theme = useTheme();
-
-  // const style = useMemo(
-  //   () => ({
-  //     // boxShadow: `0 4px 4px ${theme.palette.background.default}`,
-  //   }),
-  //   [theme.palette.background.default],
-  // );
+  const [tabs, setTabs] = useState<TabType[]>([]);
 
   // add a listener that saves the scroll position of the tab bar
   useEffect(() => {
@@ -44,8 +36,6 @@ const TabBar = () => {
     };
   }, []);
 
-  const [tabs, setTabs] = useState<TabType[]>([]);
-
   const onTabOrderChange = (tabs: TabType[]) => {
     const newTabOrder = tabs;
     newTabOrder.forEach((tab, index) => (tab.order = index));
@@ -55,28 +45,10 @@ const TabBar = () => {
 
   // get tabs from storage.
   useSignalEffect(() => {
-    if (typeof tabList.value !== 'undefined') {
+    if (typeof tabList.value !== 'undefined' && !isEqual(tabs, tabList.value)) {
       setTabs(tabList.value);
     }
   });
-
-  // const tabItems = useMemo(() => {
-  //   const items = tabs.map((tab) => {
-  //     return <Tab tab={tab} key={tab.id} />;
-  //   });
-  //   // jump to the saved scroll position
-  //   const prevScrollPosition = scrollPosition.value;
-  //   setTimeout(() => {
-  //     if (prevScrollPosition !== null) {
-  //       const tabBar = document.getElementById('tab-bar-tabs');
-  //       tabBar?.scrollTo({
-  //         left: prevScrollPosition,
-  //         behavior: 'auto',
-  //       });
-  //     }
-  //   }, 0);
-  //   return items;
-  // }, [tabs]);
 
   const renderItem = useCallback((item: TabType) => {
     return (

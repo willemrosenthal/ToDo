@@ -3,6 +3,8 @@ import { currentTab, tabContents } from '../../signal/todoData';
 import { useSignalEffect } from '@preact/signals-react';
 import Editor from './Editor';
 import { useTabSwitchPerformance } from '../../utils/performance';
+import { isLoading } from '../../signal/app';
+import SpinnerOverlay from '../Spinner/SpinnerOverlay';
 
 // Cache for editor instances
 const editorCache = new Map<string, React.ReactElement>();
@@ -66,7 +68,12 @@ const EditorWrapper = () => {
     return () => clearInterval(interval);
   }, [cachedEditors]);
 
-  return currentEditor;
+  return (
+    <>
+      {isLoading.value && <SpinnerOverlay />}
+      {currentEditor}
+    </>
+  );
 };
 
 export default EditorWrapper;

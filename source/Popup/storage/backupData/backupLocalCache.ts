@@ -9,7 +9,6 @@ export const getBackupsFromLocalStorage = (): BackupData[] | null => {
   if (!Array.isArray(existingBackups)) {
     throw new Error('Local Storage: backups are not an array');
   }
-  console.log('existing backups', existingBackups);
   return existingBackups;
 };
 
@@ -52,12 +51,10 @@ const shouldReplaceRecent = (dataToCache: BackupData, mostRecent: BackupData) =>
   // timestamps
   const latestTimestamp = mostRecent.timestamp;
   const toCacheTimestamp = dataToCache.timestamp;
-  console.log('latestTimestamp', latestTimestamp);
-  console.log('toCacheTimestamp', toCacheTimestamp);
+
   // compare
   const timeDifference = getTimeDifference(latestTimestamp, toCacheTimestamp);
   const shouldReplace = timeDifference.days < minElapsedDaysForNewBackup;
-  console.log('shouldReplace', shouldReplace, 'timeDifference', timeDifference.days);
   return shouldReplace;
 };
 
@@ -85,7 +82,6 @@ const backupLocally = (backupData: BackupData) => {
   const backupToSave = { ...backupData };
   deeplyRemoveAllKeys(backupToSave, ['recentlyDeleted']);
 
-  console.log('DATA TO CACHE AS BACKUPs', backupToSave);
   // get existing backups
   const backups = getBackupsFromLocalStorage() || [];
 
@@ -105,11 +101,7 @@ const backupLocally = (backupData: BackupData) => {
 
   // see if changes were made between the two
   const wereChangesMadeToCache = wereChangesMade(backupToSave, mostRecentBackup);
-  if (!wereChangesMadeToCache) {
-    console.log('no changes made, not saving backup to local storage');
-    return;
-  }
-
+  if (!wereChangesMadeToCache) return;
   saveBackup(backupToSave, backups, replaceRecent);
 };
 

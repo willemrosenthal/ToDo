@@ -119,7 +119,6 @@ const Main: React.FC = () => {
         {/* {showContextMenu.value && <ContextMenu />} */}
         {mode.value === 'main' && (
           <>
-            {isLoading.value && <SpinnerOverlay />}
             <ContextMenu />
             <TabBar />
             <EditorWrapper />

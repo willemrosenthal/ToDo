@@ -1,3 +1,5 @@
+const enableDevLogging = false;
+
 // Performance monitoring utility for tab switching
 class PerformanceMonitor {
   private static instance: PerformanceMonitor;
@@ -24,7 +26,7 @@ class PerformanceMonitor {
     this.tabSwitchTimes.delete(tabId);
 
     // Log performance data in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && enableDevLogging) {
       console.log(`Tab switch to ${tabId} took ${duration.toFixed(2)}ms`);
     }
 

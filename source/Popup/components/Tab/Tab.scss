@@ -40,11 +40,12 @@
 }
 
 .emoji-tab {
-  font-size: 23px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -7px !important;
+  font-size: 23px;
+  height: 30px;
+  padding-bottom: 5px;
 }
 
 .tab-label {
